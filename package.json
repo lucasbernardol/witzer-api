@@ -7,7 +7,9 @@
   "scripts": {
     "husky:install": "husky install",
     "postinstall": "yarn husky:install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:start": "ts-node-dev --transpile-only src/index.ts",
+    "dev:watch": "ts-node-dev --transpile-only --respawn src/index.ts"
   },
   "repository": {
     "type": "git",
