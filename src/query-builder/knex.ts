@@ -1,4 +1,6 @@
 import process from 'node:process';
+
+import { Model } from 'objection';
 import Knex from 'knex';
 
 const knex = Knex({
@@ -8,5 +10,7 @@ const knex = Knex({
     connectionString: process.env.DATABASE_URI,
   },
 });
+
+Model.knex(knex);
 
 export { knex };
