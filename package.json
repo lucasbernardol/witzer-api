@@ -5,6 +5,8 @@
   "main": "index.js",
   "private": true,
   "scripts": {
+    "husky:install": "husky install",
+    "postinstall": "yarn husky:install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
