@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/lucasbernardol/witzer-api/issues"
   },
-  "homepage": "https://github.com/lucasbernardol/witzer-api#readme"
+  "homepage": "https://github.com/lucasbernardol/witzer-api#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^17.3.0",
+    "@commitlint/config-conventional": "^17.3.0"
+  }
 }
