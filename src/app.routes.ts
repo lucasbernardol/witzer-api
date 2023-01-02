@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { reply } from './utils/reply.util';
+
+import { MainController } from './controllers/main.controller';
 
 const routes = Router();
 
-routes.get('/', async (_, response) => response.json(reply()));
+routes.get('/', new MainController().version);
 
 export { routes };
