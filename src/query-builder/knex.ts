@@ -1,8 +1,12 @@
+import process from 'node:process';
 import Knex from 'knex';
 
-// @ts-ignore
-import config from '../../knexfile'; // add URI STRING
-
-const knex = Knex(config.development);
+const knex = Knex({
+  client: process.env.DATABASE_TYPE,
+  connection: {
+    charset: 'utf-8',
+    connectionString: process.env.DATABASE_URI,
+  },
+});
 
 export { knex };
