@@ -1,0 +1,13 @@
+{
+  "semi": true,
+  "singleQuote": true,
+  "arrowParens": "always",
+  "bracketSameLine": true,
+  "bracketSpacing": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "editorconfig": true,
+  "overrides": [],
+  "quoteProps": "as-needed"
+}
