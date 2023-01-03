@@ -1,7 +1,7 @@
 import process from 'node:process';
 
-import { Model } from 'objection';
 import Knex from 'knex';
+import { Model } from 'objection';
 
 const knex = Knex({
   client: process.env.DATABASE_TYPE,

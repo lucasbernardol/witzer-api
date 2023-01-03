@@ -2,15 +2,15 @@
 GET http://localhost:3333/ HTTP/1.1
 
 ### Path: "/:hash"
-GET http://localhost:3333/RRnSoFc HTTP/1.1
+GET http://localhost:3333/JHqCta_ HTTP/1.1
 
 
 ### QRCODE - "/api/links/qrcode/:hash"
-GET http://localhost:3333/api/links/qrcode/RRnSoFc/ HTTP/1.1
+GET http://localhost:3333/api/links/qrcode/JHqCta_/ HTTP/1.1
 Accept: application/json
 
 ### FORMAT - "/api/links/format/:hash"
-GET http://localhost:3333/api/links/format/RRnSoFc/?type=json HTTP/1.1
+GET http://localhost:3333/api/links/format/JHqCta_/?type=json HTTP/1.1
 Accept: application/json
 
 ### CREATE - "/api/links"

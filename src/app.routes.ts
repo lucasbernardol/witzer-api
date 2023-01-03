@@ -16,3 +16,8 @@ routes.get('/api/links/qrcode/:hash', linkController.qrcode);
 routes.post('/api/links', linkController.create);
 
 export { routes };
+
+/*
+ Middleware de redirecionamento (a partir de parâmetros query/modificadores)
+ deve recever o path de destino (/api/links/qrcode/:hash)
+*/

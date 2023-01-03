@@ -1,7 +1,5 @@
-import type { ModelOptions, QueryContext } from 'objection';
-
+import { Model } from '../core/common/model';
 import tableNames from '../constants/table-names.constants';
-import { Entity } from './common/base-model';
 
 export type LinkTypes = {
   id: string;
@@ -16,10 +14,11 @@ export type LinkTypes = {
   _version: number;
 };
 
-export class Link extends Entity implements LinkTypes {
-  public constructor() {
-    super();
-  }
+type LinkTypeRecordKeys = keyof LinkTypes;
+
+export class Link extends Model implements LinkTypes {
+  static idColumn: string = 'id';
+  static tableName: string = tableNames.link;
 
   id!: string;
   href!: string;
@@ -32,11 +31,13 @@ export class Link extends Entity implements LinkTypes {
   deleted_at!: Date | null;
   _version!: number;
 
-  static get idColumn() {
-    return 'id';
-  }
-
-  static get tableName() {
-    return tableNames.link;
+  static whitelist(): Readonly<Array<LinkTypeRecordKeys>> {
+    // prettier-ignore
+    return [
+			'id',
+      'href',
+      'redirectings',
+      '_version',
+		]
   }
 }
