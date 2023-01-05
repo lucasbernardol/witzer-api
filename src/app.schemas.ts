@@ -5,7 +5,7 @@ import { slugified } from './utils/slugify.util';
 import { SLUG_REPLECE_CHARS_REGEX } from './constants/regex.constants';
 
 export const hashSchema = Joi.object({
-  hash: Joi.string()
+  code: Joi.string()
     .min(7)
     .max(255)
     .custom((value, helpers) => {

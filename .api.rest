@@ -9,11 +9,11 @@ GET http://localhost:3333/UCdUrQU HTTP/1.1
 
 
 ### QRCODE - "/api/links/qrcode/:hash"
-GET http://localhost:3333/api/links/qrcode/duk-rsR/ HTTP/1.1
+GET http://localhost:3333/api/links/qrcode/UCdUrQU/ HTTP/1.1
 Accept: application/json
 
 ### FORMAT - "/api/links/format/:hash"
-GET http://localhost:3333/api/links/format/duk-rsR/?type=json HTTP/1.1
+GET http://localhost:3333/api/links/format/UCdUrQU/?type=json HTTP/1.1
 Accept: application/json
 
 

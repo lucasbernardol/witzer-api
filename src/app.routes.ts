@@ -21,12 +21,12 @@ routes.get(
 );
 
 routes.get(
-  '/api/links/format/:hash',
+  '/api/links/format/:code',
   celebrate({ params: hashSchema }),
   linkController.format
 );
 routes.get(
-  '/api/links/qrcode/:hash',
+  '/api/links/qrcode/:code',
   celebrate({ params: hashSchema }),
   linkController.qrcode
 );

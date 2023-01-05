@@ -21,7 +21,7 @@ class LinkServices {
     private readonly model: ModelClass<Link> & typeof Link = Link
   ) {}
 
-  async withHashOrSlug(hashOrSlug: string): Promise<LinkTypes> {
+  async withHash(hashOrSlug: string): Promise<LinkTypes> {
     const _where: PartialModelObject<Link> = {
       hash: hashOrSlug,
       deleted_at: null,

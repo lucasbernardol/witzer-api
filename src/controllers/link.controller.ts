@@ -30,6 +30,8 @@ export class LinkController implements LinkControllerImplements {
     try {
       const { code } = request.params as { code: string }; // sha256
 
+      console.log({ code });
+
       const query = request.query as { type: string };
 
       const queryResponseTyped = query?.type || TYPES['RAW'];
@@ -37,10 +39,10 @@ export class LinkController implements LinkControllerImplements {
       const { href, ...deepEntity } = await LinkServices.withHash(code);
 
       if (isTypes(queryResponseTyped) /* JON */) {
-        response.status(StatusCodes.MOVED_PERMANENTLY).json({ href });
+        response.status(StatusCodes.OK).json({ href });
         // return
       } else {
-        response.status(StatusCodes.MOVED_PERMANENTLY).send(href);
+        response.status(StatusCodes.OK).send(href);
       }
 
       await LinkServices.analytics(deepEntity.hash, deepEntity as any);
@@ -92,9 +94,9 @@ export class LinkController implements LinkControllerImplements {
 
   async qrcode(request: Request, response: Response, next: NextFunction) {
     try {
-			const { hash } = request.params as { hash: string };
+			const { code } = request.params as { code: string };
 
-			const hashed = createHash(hash);
+			const hashed = createHash(code);
 
 			return response.status(StatusCodes.OK).json({ type: 'qrcode', hashed });
 		} catch (error) { return next(error) } // prettier-ignore
