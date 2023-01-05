@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import type { LinkControllerImplements } from './interfaces/link-controller.interface';
 
+import { LinkServices } from '../services/link.services';
+
 import type { PartialModelObject } from 'objection';
 import { StatusCodes } from 'http-status-codes';
 
@@ -12,36 +14,36 @@ import { createHash } from '../utils/crypto/hash.util';
 import { slugified } from '../utils/slugify.util';
 import { reply } from '../utils/reply.util';
 
+enum TYPES {
+  JSON = 'json',
+  RAW = 'raw',
+}
+
+function isTypes(type: string, key: keyof typeof TYPES = 'JSON') {
+  return TYPES[key] === type?.toLowerCase();
+}
+
 export class LinkController implements LinkControllerImplements {
   public constructor() {}
 
   async format(request: Request, response: Response, next: NextFunction) {
     try {
-      const { hash } = request.params as { hash: string };
+      const { code } = request.params as { code: string }; // sha256
 
-      const queries = request.query as { type: string };
+      const query = request.query as { type: string };
 
-      const queryResponseType = queries?.type || 'raw';
+      const queryResponseTyped = query?.type || TYPES['RAW'];
 
-      const link = await Link.query()
-        .findOne({ hash: createHash(hash) })
-        .select(['id', 'href', 'redirectings', '_version']);
+      const { href, ...deepEntity } = await LinkServices.withHash(code);
 
-      if (!link) {
-        return response
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: 'Not found', hash });
+      if (isTypes(queryResponseTyped) /* JON */) {
+        response.status(StatusCodes.MOVED_PERMANENTLY).json({ href });
+        // return
+      } else {
+        response.status(StatusCodes.MOVED_PERMANENTLY).send(href);
       }
 
-      if (queryResponseType?.toLowerCase() === 'json') {
-        const { href } = link as { href: string };
-
-        return response.status(StatusCodes.OK).json({ href, hash });
-      }
-
-      response.type('tex/plain');
-
-      return response.status(StatusCodes.OK).send(link.href);
+      await LinkServices.analytics(deepEntity.hash, deepEntity as any);
     } catch (error) {
       return next(error);
     }
@@ -49,35 +51,13 @@ export class LinkController implements LinkControllerImplements {
 
   async redirect(request: Request, response: Response, next: NextFunction) {
     try {
-      const { hash } = request.params as { hash: string };
+      const { code } = request.params as { code: string }; // sha256
 
-      const _where: PartialModelObject<Link> = { hash, deleted_at: null };
+      const { href, ...deepEntity } = await LinkServices.withHash(code);
 
-      const _fields = Link.whitelist();
+      response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
 
-      const link = await Link.query()
-        .select(_fields)
-        .where(_where)
-        .orWhere({ slug: hash, deleted_at: null })
-        .first()
-        .execute();
-
-      if (!link /* falsy */) {
-        const status = StatusCodes.NOT_FOUND;
-
-        return response.status(status).json({ message: 'Link not found' });
-      }
-
-      // Redirect to href
-      response.status(StatusCodes.MOVED_PERMANENTLY).redirect(link.href);
-
-      const staged: PartialModelObject<Link> = {
-        activated_at: Date.now(),
-        redirectings: link.redirectings + 1,
-        _version: Number.parseInt(link._version as any, 10) + 1,
-      };
-
-      await Link.query().update(staged).where(_where).orWhere(_where).execute();
+      await LinkServices.analytics(deepEntity.hash, deepEntity as any);
     } catch (error) {
       return next(error);
     }
@@ -89,13 +69,13 @@ export class LinkController implements LinkControllerImplements {
 
       const { plain, hash } = request?.code as HashProcessOutput;
 
+      console.log({ href, slug, plain, hash });
+      /*
       const plainSlugWithoutHashing: string = slugified(slug);
 
       const slugHashed = createHash(plainSlugWithoutHashing); // sha256
 
-      /**
-       * - Model save "links" using Objection/Knex.
-       */
+    
       await Link.query().insert({ href, hash, slug: slugHashed }).execute();
 
       const stated: PartialModelObject<Link> = {
@@ -103,8 +83,8 @@ export class LinkController implements LinkControllerImplements {
         hash: plain,
         slug: plainSlugWithoutHashing,
       };
-
-      return response.status(StatusCodes.CREATED).json(reply(stated));
+      */
+      return response.status(StatusCodes.CREATED).json(reply({}));
     } catch (error) {
       return next(error);
     }

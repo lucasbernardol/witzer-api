@@ -15,7 +15,7 @@ const linkController = new LinkController();
 routes.get('/', mainController.version);
 
 routes.get(
-  '/:hash',
+  '/:code',
   celebrate({ params: hashSchema }),
   linkController.redirect
 );

@@ -25,6 +25,7 @@ export class Link extends Model implements LinkTypes {
     return [
 			'id',
       'href',
+			'hash',
       'redirectings',
       '_version',
 		]

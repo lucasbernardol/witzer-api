@@ -24,5 +24,5 @@ Accept: application/json
 
 {
 	"href": "https://www.google.com/?q=Bunjs",
-	"slug": "bun over js"
+	"slug": "bun over js @#"
 }
