@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import type { LinkControllerImplements } from './interfaces/link-controller.interface';
 
-import { PartialModelObject } from 'objection';
+import type { PartialModelObject } from 'objection';
 import { StatusCodes } from 'http-status-codes';
-
-import { nanoid } from 'nanoid';
 
 import { Link } from '../models/link.model';
 
+import type { HashProcessOutput } from '../app.middlewares';
+
 import { createHash } from '../utils/crypto/hash.util';
-import { mapper } from '../utils/mapper.util';
+import { slugified } from '../utils/slugify.util';
 import { reply } from '../utils/reply.util';
 
 export class LinkController implements LinkControllerImplements {
@@ -24,7 +24,7 @@ export class LinkController implements LinkControllerImplements {
       const queryResponseType = queries?.type || 'raw';
 
       const link = await Link.query()
-        .findOne({ hash })
+        .findOne({ hash: createHash(hash) })
         .select(['id', 'href', 'redirectings', '_version']);
 
       if (!link) {
@@ -37,9 +37,9 @@ export class LinkController implements LinkControllerImplements {
         const { href } = link as { href: string };
 
         return response.status(StatusCodes.OK).json({ href, hash });
-      } else if (queryResponseType.toLowerCase() == 'qrcode') {
-        return response.redirect(`/api/links/qrcode/${hash}`);
       }
+
+      response.type('tex/plain');
 
       return response.status(StatusCodes.OK).send(link.href);
     } catch (error) {
@@ -51,11 +51,16 @@ export class LinkController implements LinkControllerImplements {
     try {
       const { hash } = request.params as { hash: string };
 
-      const _fields = Link.whitelist();
-
       const _where: PartialModelObject<Link> = { hash, deleted_at: null };
 
-      const link = await Link.query().findOne(_where).select(_fields).execute();
+      const _fields = Link.whitelist();
+
+      const link = await Link.query()
+        .select(_fields)
+        .where(_where)
+        .orWhere({ slug: hash, deleted_at: null })
+        .first()
+        .execute();
 
       if (!link /* falsy */) {
         const status = StatusCodes.NOT_FOUND;
@@ -72,7 +77,7 @@ export class LinkController implements LinkControllerImplements {
         _version: Number.parseInt(link._version as any, 10) + 1,
       };
 
-      await Link.query().update(staged).where(_where).execute();
+      await Link.query().update(staged).where(_where).orWhere(_where).execute();
     } catch (error) {
       return next(error);
     }
@@ -80,16 +85,26 @@ export class LinkController implements LinkControllerImplements {
 
   async create(request: Request, response: Response, next: NextFunction) {
     try {
-      const { href } = request.body as { href: string };
+      const { href, slug } = request.body as { href: string; slug: string };
 
-      const staged: PartialModelObject<Link> = {
+      const { plain, hash } = request?.code as HashProcessOutput;
+
+      const plainSlugWithoutHashing: string = slugified(slug);
+
+      const slugHashed = createHash(plainSlugWithoutHashing); // sha256
+
+      /**
+       * - Model save "links" using Objection/Knex.
+       */
+      await Link.query().insert({ href, hash, slug: slugHashed }).execute();
+
+      const stated: PartialModelObject<Link> = {
         href,
-        hash: nanoid(7),
+        hash: plain,
+        slug: plainSlugWithoutHashing,
       };
 
-      const link = await Link.query().insert(staged).execute();
-
-      return response.status(StatusCodes.CREATED).json(reply(mapper(link)));
+      return response.status(StatusCodes.CREATED).json(reply(stated));
     } catch (error) {
       return next(error);
     }
@@ -97,11 +112,11 @@ export class LinkController implements LinkControllerImplements {
 
   async qrcode(request: Request, response: Response, next: NextFunction) {
     try {
-			const { hash } = request.params as { hash: string }; 
+			const { hash } = request.params as { hash: string };
 
-			console.log(createHash(hash))
+			const hashed = createHash(hash);
 
-			return response.status(StatusCodes.OK).json({ type: 'qrcode', hash });
+			return response.status(StatusCodes.OK).json({ type: 'qrcode', hashed });
 		} catch (error) { return next(error) } // prettier-ignore
   }
 }

@@ -1,17 +1,21 @@
 ### Path: "/"
 GET http://localhost:3333/ HTTP/1.1
 
+### "UCdUrQU" 
+### "bun-over-js"
+
 ### Path: "/:hash"
-GET http://localhost:3333/JHqCta_ HTTP/1.1
+GET http://localhost:3333/UCdUrQU HTTP/1.1
 
 
 ### QRCODE - "/api/links/qrcode/:hash"
-GET http://localhost:3333/api/links/qrcode/JHqCta_/ HTTP/1.1
+GET http://localhost:3333/api/links/qrcode/duk-rsR/ HTTP/1.1
 Accept: application/json
 
 ### FORMAT - "/api/links/format/:hash"
-GET http://localhost:3333/api/links/format/JHqCta_/?type=json HTTP/1.1
+GET http://localhost:3333/api/links/format/duk-rsR/?type=json HTTP/1.1
 Accept: application/json
+
 
 ### CREATE - "/api/links"
 POST http://localhost:3333/api/links HTTP/1.1
@@ -19,5 +23,6 @@ Content-Type: application/json
 Accept: application/json
 
 {
-	"href": "https://www.google.com/?q=Node.js"
+	"href": "https://www.google.com/?q=Bunjs",
+	"slug": "bun over js"
 }

@@ -1,7 +1,11 @@
 import { Router } from 'express';
+import { celebrate } from 'celebrate';
 
 import { MainController } from './controllers/main.controller';
 import { LinkController } from './controllers/link.controller';
+
+import { bodySchema, hashSchema } from './app.schemas';
+import { hashMiddleware } from './app.middlewares';
 
 const routes = Router();
 
@@ -9,11 +13,30 @@ const mainController = new MainController();
 const linkController = new LinkController();
 
 routes.get('/', mainController.version);
-routes.get('/:hash', linkController.redirect);
 
-routes.get('/api/links/format/:hash', linkController.format);
-routes.get('/api/links/qrcode/:hash', linkController.qrcode);
-routes.post('/api/links', linkController.create);
+routes.get(
+  '/:hash',
+  celebrate({ params: hashSchema }),
+  linkController.redirect
+);
+
+routes.get(
+  '/api/links/format/:hash',
+  celebrate({ params: hashSchema }),
+  linkController.format
+);
+routes.get(
+  '/api/links/qrcode/:hash',
+  celebrate({ params: hashSchema }),
+  linkController.qrcode
+);
+
+routes.post(
+  '/api/links',
+  celebrate({ body: bodySchema }),
+  hashMiddleware(),
+  linkController.create
+);
 
 export { routes };
 
