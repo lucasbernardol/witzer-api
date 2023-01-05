@@ -1,18 +1,7 @@
 import { Model } from '../core/common/model';
 import tableNames from '../constants/table-names.constants';
 
-export type LinkTypes = {
-  id: string;
-  href: string;
-  hash: string;
-  slug?: string | null;
-  redirectings: number;
-  activated_at: number;
-  created_at: Date;
-  updated_at: Date;
-  deleted_at: Date | null;
-  _version: number;
-};
+import type { LinkTypes } from './interfaces/link-model.interface';
 
 type LinkTypeRecordKeys = keyof LinkTypes;
 

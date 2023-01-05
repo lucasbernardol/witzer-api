@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid';
 
 import { Link } from '../models/link.model';
 
+import { createHash } from '../utils/crypto/hash.util';
 import { mapper } from '../utils/mapper.util';
 import { reply } from '../utils/reply.util';
 
@@ -97,6 +98,8 @@ export class LinkController implements LinkControllerImplements {
   async qrcode(request: Request, response: Response, next: NextFunction) {
     try {
 			const { hash } = request.params as { hash: string }; 
+
+			console.log(createHash(hash))
 
 			return response.status(StatusCodes.OK).json({ type: 'qrcode', hash });
 		} catch (error) { return next(error) } // prettier-ignore

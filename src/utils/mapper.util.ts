@@ -1,6 +1,6 @@
-import type { LinkTypes } from '../models/link.model';
+import type { LinkTypes } from '../models/interfaces/link-model.interface';
 
-type MapperFunction = (link: LinkTypes) => Partial<LinkTypes>;
+export type MapperFunction = (link: LinkTypes) => Partial<LinkTypes>;
 
 export const mapper: MapperFunction = ({ href, hash }) => {
   return {
