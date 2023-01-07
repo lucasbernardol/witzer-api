@@ -12,7 +12,6 @@ export class Link extends Model implements LinkTypes {
   id!: string;
   href!: string;
   hash!: string;
-  slug?: string;
   redirectings!: number;
   activated_at!: number;
   created_at!: Date;
