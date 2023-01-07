@@ -10,12 +10,12 @@ export async function up(knex: Knex): Promise<void> {
       .defaultTo(knex.raw('uuid_generate_v4()'));
     table.string('href', 2048).notNullable();
     table.string('hash').unique().notNullable();
-    table.string('slug').unique().nullable().defaultTo(null);
-
     table.integer('redirectings').notNullable().defaultTo(0);
     table.bigint('activated_at').nullable().defaultTo(null);
+
     table.timestamps(true, true, false);
     table.timestamp('deleted_at').nullable().defaultTo(null);
+
     table.bigint('_version').notNullable().defaultTo(1);
   });
 }
