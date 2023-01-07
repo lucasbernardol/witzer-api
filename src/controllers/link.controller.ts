@@ -1,18 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import type { LinkControllerImplements } from './interfaces/link-controller.interface';
 
-import { LinkServices } from '../services/link.services';
-
-import type { PartialModelObject } from 'objection';
 import { StatusCodes } from 'http-status-codes';
 
-import { Link } from '../models/link.model';
-
+import { LinkServices } from '../services/link.services';
 import type { HashProcessOutput } from '../app.middlewares';
 
-import { createHash } from '../utils/crypto/hash.util';
-import { slugified } from '../utils/slugify.util';
-import { reply } from '../utils/reply.util';
+import { qrcodeHash } from '../utils/qrcode.util';
 
 enum TYPES {
   JSON = 'json',
@@ -28,15 +22,13 @@ export class LinkController implements LinkControllerImplements {
 
   async format(request: Request, response: Response, next: NextFunction) {
     try {
-      const { code } = request.params as { code: string }; // sha256
-
-      console.log({ code });
+      const { hash } = request.params as { hash: string };
 
       const query = request.query as { type: string };
 
       const queryResponseTyped = query?.type || TYPES['RAW'];
 
-      const { href, ...deepEntity } = await LinkServices.withHash(code);
+      const { href, ...deepEntity } = await LinkServices.withHash(hash);
 
       if (isTypes(queryResponseTyped) /* JON */) {
         response.status(StatusCodes.OK).json({ href });
@@ -51,15 +43,15 @@ export class LinkController implements LinkControllerImplements {
     }
   }
 
-  async redirect(request: Request, response: Response, next: NextFunction) {
+  async resolves(request: Request, response: Response, next: NextFunction) {
     try {
-      const { code } = request.params as { code: string }; // sha256
+      const { hash } = request.params as { hash: string }; // sha256
 
-      const { href, ...deepEntity } = await LinkServices.withHash(code);
+      const { href, ...deepEntity } = await LinkServices.withHash(hash);
 
       response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
 
-      await LinkServices.analytics(deepEntity.hash, deepEntity as any);
+      await LinkServices.analytics(hash, deepEntity as any);
     } catch (error) {
       return next(error);
     }
@@ -67,26 +59,13 @@ export class LinkController implements LinkControllerImplements {
 
   async create(request: Request, response: Response, next: NextFunction) {
     try {
-      const { href, slug } = request.body as { href: string; slug: string };
+      const { href } = request.body as { href: string };
 
-      const { plain, hash } = request?.code as HashProcessOutput;
+      const { hash, plain } = request?.code as HashProcessOutput; // sha512
 
-      console.log({ href, slug, plain, hash });
-      /*
-      const plainSlugWithoutHashing: string = slugified(slug);
+      await LinkServices.create({ href, hash });
 
-      const slugHashed = createHash(plainSlugWithoutHashing); // sha256
-
-    
-      await Link.query().insert({ href, hash, slug: slugHashed }).execute();
-
-      const stated: PartialModelObject<Link> = {
-        href,
-        hash: plain,
-        slug: plainSlugWithoutHashing,
-      };
-      */
-      return response.status(StatusCodes.CREATED).json(reply({}));
+      return response.status(StatusCodes.CREATED).json({ href, hash: plain });
     } catch (error) {
       return next(error);
     }
@@ -94,11 +73,20 @@ export class LinkController implements LinkControllerImplements {
 
   async qrcode(request: Request, response: Response, next: NextFunction) {
     try {
-			const { code } = request.params as { code: string };
+      const { hash } = request.params as { hash: string }; // plain/text
 
-			const hashed = createHash(code);
+      // verificar se existe um registro
+      // gerar qrcode baseado no hash (plain text) recebido
+      await LinkServices.hasThrows(hash);
 
-			return response.status(StatusCodes.OK).json({ type: 'qrcode', hashed });
-		} catch (error) { return next(error) } // prettier-ignore
+      const qrcode = await qrcodeHash(hash);
+
+      // Content-type: 'image/png'
+      response.type('image/png');
+
+      return response.status(StatusCodes.OK).send(qrcode);
+    } catch (error) {
+      return next(error);
+    }
   }
 }

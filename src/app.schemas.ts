@@ -1,36 +1,22 @@
 import { Joi } from 'celebrate'; // install separated
+import { createHashSha512 } from './utils/crypto/hash.util';
 
-import { createHash } from './utils/crypto/hash.util';
-import { slugified } from './utils/slugify.util';
-import { SLUG_REPLECE_CHARS_REGEX } from './constants/regex.constants';
+const callback = (value: any, helpers: any) => {
+  if (!value /* value === null */) {
+    return value;
+  }
 
-export const hashSchema = Joi.object({
-  code: Joi.string()
-    .min(7)
-    .max(255)
-    .custom((value, helpers) => {
-      //console.log({ value, helpers });
+  return createHashSha512(value); // sha512
+};
 
-      return createHash(value); // sha256
-    })
-    .required(),
+export const hashSchemaWithoutEncoding = Joi.object<{ hash: string }>({
+  hash: Joi.string().min(7).max(7).required(),
 });
 
-export const bodySchema = Joi.object({
-  href: Joi.string().min(6).max(2048).trim().required(),
-  slug: Joi.string()
-    .min(7)
-    .max(255)
-    .replace(SLUG_REPLECE_CHARS_REGEX, '')
-    .trim()
-    .optional()
-    .allow(null)
-    .default(null)
-    .custom((value, helpers) => {
-      if (!value /* value === null */) {
-        return value;
-      }
+export const hashSchema = Joi.object<{ hash: string }>({
+  hash: Joi.string().min(7).max(7).required().custom(callback),
+});
 
-      return slugified(value);
-    }),
+export const bodySchema = Joi.object<{ href: string }>({
+  href: Joi.string().min(6).max(2048).trim().required(),
 });

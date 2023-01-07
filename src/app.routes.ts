@@ -1,46 +1,33 @@
 import { Router } from 'express';
-import { celebrate } from 'celebrate';
+import { celebrate, Segments } from 'celebrate';
 
 import { MainController } from './controllers/main.controller';
 import { LinkController } from './controllers/link.controller';
 
-import { bodySchema, hashSchema } from './app.schemas';
-import { hashMiddleware } from './app.middlewares';
+import {
+  bodySchema,
+  hashSchema,
+  hashSchemaWithoutEncoding,
+} from './app.schemas';
+import { hash } from './app.middlewares';
 
 const routes = Router();
 
-const mainController = new MainController();
-const linkController = new LinkController();
+const controller = new LinkController();
 
-routes.get('/', mainController.version);
+const params = (schema: any) => celebrate({ [Segments.PARAMS]: schema });
+const body = (schema: any) => celebrate({ [Segments.BODY]: schema });
 
+routes.get('/', new MainController().version);
+routes.get('/:hash', params(hashSchema), controller.resolves);
+
+routes.get('/api/links/format/:hash', params(hashSchema), controller.format);
 routes.get(
-  '/:code',
-  celebrate({ params: hashSchema }),
-  linkController.redirect
+  '/api/links/qrcode/:hash',
+  params(hashSchemaWithoutEncoding),
+  controller.qrcode
 );
 
-routes.get(
-  '/api/links/format/:code',
-  celebrate({ params: hashSchema }),
-  linkController.format
-);
-routes.get(
-  '/api/links/qrcode/:code',
-  celebrate({ params: hashSchema }),
-  linkController.qrcode
-);
-
-routes.post(
-  '/api/links',
-  celebrate({ body: bodySchema }),
-  hashMiddleware(),
-  linkController.create
-);
+routes.post('/api/links', body(bodySchema), hash(), controller.create);
 
 export { routes };
-
-/*
- Middleware de redirecionamento (a partir de parâmetros query/modificadores)
- deve recever o path de destino (/api/links/qrcode/:hash)
-*/

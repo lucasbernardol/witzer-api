@@ -1,28 +1,11 @@
 import crypto from 'node:crypto';
-import type { BinaryToTextEncoding } from 'node:crypto';
 
-type CreateHashOptions = {
-  algorithm: string;
-  encoding: BinaryToTextEncoding;
+const SECRET_HMAC = process.env.APP_HASHMAC_SECRET;
+
+type CreateHashFunction = (data: string) => string;
+
+export const createHashSha512: CreateHashFunction = (data) => {
+  const hmac = crypto.createHmac('sha512', SECRET_HMAC);
+
+  return hmac.update(data).digest('hex');
 };
-
-type CreateHashFunction = (
-  data: string,
-  options?: Partial<CreateHashOptions>
-) => string;
-
-const CREATE_OPTIONS: Partial<CreateHashOptions> = {
-  algorithm: 'sha256',
-  encoding: 'hex',
-};
-
-const createHash: CreateHashFunction = (data, options = CREATE_OPTIONS) => {
-  const { algorithm, encoding } = options as CreateHashOptions;
-
-  return crypto
-    .createHash(algorithm)
-    .update(data)
-    .digest(encoding ?? 'hex');
-};
-
-export { createHash };

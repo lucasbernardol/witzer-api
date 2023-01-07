@@ -1,5 +1,10 @@
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
+
 import compression from 'compression';
+
+import { isHttpError } from 'http-errors';
+import { errors } from 'celebrate';
 
 import helmet from 'helmet';
 import cors from 'cors';
@@ -7,7 +12,6 @@ import cors from 'cors';
 import morgan from 'morgan';
 import hpp from 'hpp';
 
-import { errors } from 'celebrate';
 import { routes } from './app.routes';
 
 export const app = express();
@@ -33,3 +37,15 @@ app.use(morgan('dev'));
 app.use(routes);
 
 app.use(errors()); // Celebrate/Joi validation ERRORS.
+
+app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
+  if (isHttpError(error) /* asserts */) {
+    return response.status(error.status).json({
+      name: error.name,
+      status: error.statusCode,
+      message: error.message,
+    });
+  } else {
+    return response.status(500).json({ message: 'Internal server exception' });
+  }
+});
