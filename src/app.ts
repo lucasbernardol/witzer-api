@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 import compression from 'compression';
 
-import { isHttpError } from 'http-errors';
+import { isHttpError, NotFound } from 'http-errors';
 import { errors } from 'celebrate';
 
 import helmet from 'helmet';
@@ -37,6 +37,10 @@ app.use(morgan('dev'));
 app.use(routes);
 
 app.use(errors()); // Celebrate/Joi validation ERRORS.
+
+app.use((request, response, next) => {
+  return next(new NotFound());
+});
 
 app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
   if (isHttpError(error) /* asserts */) {

@@ -1,1 +1,14 @@
-{}
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@constants/*": ["constants/*"],
+      "@controllers/*": ["controllers/*"],
+      "@query-builder/*": ["query-builder/*"],
+      "@models/*": ["models/*"],
+      "@core/*": ["core/*"],
+      "@services/*": ["services/*"],
+      "@utils/*": ["utils/*"]
+    }
+  }
+}

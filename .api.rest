@@ -1,6 +1,14 @@
 ### Path: "/"
 GET http://localhost:3333/ HTTP/1.1
 
+### Path: "/stats"
+GET http://localhost:3333/stats HTTP/1.1
+
+### Path: "/stats"
+GET http://localhost:3333/DATnoCZ HTTP/1.1
+
+
+
 ### RESOLVES - "/:hash"
 GET http://localhost:3333/DATnoCZ HTTP/1.1
 Accept: application/json

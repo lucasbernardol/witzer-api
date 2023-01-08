@@ -3,10 +3,10 @@ import type { LinkControllerImplements } from './interfaces/link-controller.inte
 
 import { StatusCodes } from 'http-status-codes';
 
-import { LinkServices } from '../services/link.services';
-import type { HashProcessOutput } from '../app.middlewares';
+import { LinkServices } from '@services/link.services';
+import { qrcodeHash } from '@utils/qrcode.util';
 
-import { qrcodeHash } from '../utils/qrcode.util';
+import type { HashProcessOutput } from '../app.middlewares';
 
 enum TYPES {
   JSON = 'json',

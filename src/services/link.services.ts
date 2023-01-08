@@ -95,6 +95,18 @@ class LinkServices {
 
     return !!entity;
   }
+
+  async stats(): Promise<string> {
+    const queryBuilder = this.queryBuilder();
+
+    const primaryIdColumn = this.model.idColumn; // Objection "id" column references.
+
+    const [statistics] = await queryBuilder.count(primaryIdColumn).execute();
+
+    const analytics = statistics as unknown as { count: string };
+
+    return analytics.count;
+  }
 }
 
 const linkServices = LinkServices.get();
