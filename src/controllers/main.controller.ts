@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import type { LinkControllerImplements } from './interfaces/link-controller.interface';
+import type { MainControllerInterfaces } from './interfaces/main-controller.interface';
 
 import { StatusCodes } from 'http-status-codes';
 
 import { LinkServices } from '@services/link.services';
 import { qrcodeHash } from '@utils/qrcode.util';
-
 import type { HashProcessOutput } from '../app.middlewares';
 
 enum TYPES {
@@ -17,7 +16,7 @@ function isTypes(type: string, key: keyof typeof TYPES = 'JSON') {
   return TYPES[key] === type?.toLowerCase();
 }
 
-export class LinkController implements LinkControllerImplements {
+export class MainController implements MainControllerInterfaces {
   public constructor() {}
 
   async format(request: Request, response: Response, next: NextFunction) {

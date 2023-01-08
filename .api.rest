@@ -1,25 +1,20 @@
 ### Path: "/"
 GET http://localhost:3333/ HTTP/1.1
 
-### Path: "/stats"
+### Path: "/stats/x"
 GET http://localhost:3333/stats HTTP/1.1
-
-### Path: "/stats"
-GET http://localhost:3333/DATnoCZ HTTP/1.1
-
 
 
 ### RESOLVES - "/:hash"
-GET http://localhost:3333/DATnoCZ HTTP/1.1
+GET http://localhost:3333/K_frzHL HTTP/1.1
 Accept: application/json
 
-
 ### QRCODE - "/qrcode/:hash"
-GET http://localhost:3333/api/links/qrcode/DATnoCZ HTTP/1.1
+GET http://localhost:3333/api/links/qrcode/K_frzHL HTTP/1.1
 Accept: application/json
 
 ### FORMAT - "/format/:hash"
-GET http://localhost:3333/api/links/format/DATnoCZ/?type=json HTTP/1.1
+GET http://localhost:3333/api/links/format/K_frzHL/?type=json HTTP/1.1
 Accept: application/json
 
 ### CREATE - "/api/links"
@@ -28,5 +23,5 @@ Content-Type: application/json
 Accept: application/json
 
 {
-	"href": "https://www.google.com/?q=TypeScript"
+	"href": "https://www.google.com/?q=Express.js"
 }

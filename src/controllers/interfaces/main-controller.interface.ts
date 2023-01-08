@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 
-export interface LinkControllerImplements {
+export interface MainControllerInterfaces {
   create(
     request: Request,
     response: Response,

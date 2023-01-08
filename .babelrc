@@ -1,0 +1,30 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ],
+    "@babel/preset-typescript"
+  ],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "@constants": "./src/constants",
+          "@controllers": "./src/controllers",
+          "@services": "./src/services",
+          "@models": "./src/models",
+          "@query-builder": "./src/query-builder",
+          "@core": "./src/core",
+          "@utils": "./src/utils"
+        }
+      }
+    ]
+  ],
+  "comments": false
+}

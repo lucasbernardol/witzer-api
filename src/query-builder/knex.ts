@@ -9,10 +9,6 @@ const knex = Knex({
     charset: 'utf-8',
     connectionString: process.env.DATABASE_URI,
   },
-  debug: true,
-  log: {
-    debug: console.log,
-  },
 });
 
 Model.knex(knex);

@@ -1,5 +1,5 @@
-import { Model } from '../core/common/model';
-import tableNames from '../constants/table-names.constants';
+import { Model } from '@core/common/model';
+import tableNames from '@constants/table-names.constants';
 
 import type { LinkTypes } from './interfaces/link-model.interface';
 

@@ -10,28 +10,25 @@ import { NotFound } from 'http-errors';
 import dayjs from 'dayjs';
 import dayjsUTCPlugin from 'dayjs/plugin/utc';
 
-import { Link } from '../models/link.model';
-import { LinkTypes } from '../models/interfaces/link-model.interface';
-
-import { createHashSha512 } from '../utils/crypto/hash.util';
+import { Link } from '@models/link.model';
+import { LinkTypes } from '@models/interfaces/link-model.interface';
+import { createHashSha512 } from '@utils/crypto/hash.util';
 
 dayjs.extend(dayjsUTCPlugin);
 
 class LinkServices {
   private static instance: LinkServices;
+  private readonly model: ModelClass<Link> & typeof Link = Link;
 
   public static get() {
     if (!this.instance) {
-      // new this()
       this.instance = new LinkServices();
     }
 
     return this.instance;
   }
 
-  private constructor(
-    private readonly model: ModelClass<Link> & typeof Link = Link
-  ) {}
+  private constructor() {}
 
   private queryBuilder(): QueryBuilder<Link, Link[]> {
     return this.model.query();
@@ -65,6 +62,20 @@ class LinkServices {
 
   async analytics(hash: string, deepEntity: ModelObject<Link>): Promise<void> {
     const queryBuilder = this.model.query(); // Object query builder.
+
+    const _updated: PartialModelObject<Link> = {
+      activated_at: dayjs().unix(),
+      redirectings: deepEntity?.redirectings + 1,
+      _version: Number.parseInt(deepEntity._version as any) + 1,
+    };
+
+    await queryBuilder.update(_updated).where({ hash }).execute();
+  }
+
+  async fullAnalytics(hash: string) {
+    const queryBuilder = this.queryBuilder();
+
+    const deepEntity = (await queryBuilder.findOne({ hash }).execute()) as Link;
 
     const _updated: PartialModelObject<Link> = {
       activated_at: dayjs().unix(),
