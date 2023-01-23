@@ -12,7 +12,7 @@ import dayjsUTCPlugin from 'dayjs/plugin/utc';
 
 import { Link } from '@models/link.model';
 import { LinkTypes } from '@models/interfaces/link-model.interface';
-import { createHashSha512 } from '@utils/crypto/hash.util';
+import { sha512 } from '@utils/crypto/sha-512.util';
 
 dayjs.extend(dayjsUTCPlugin);
 
@@ -32,6 +32,17 @@ class LinkServices {
 
   private queryBuilder(): QueryBuilder<Link, Link[]> {
     return this.model.query();
+  }
+
+  async all() {
+    const queryBuilder = this.queryBuilder();
+
+    const links = await queryBuilder
+      .select(this.model.whitelist())
+      .limit(100)
+      .execute();
+
+    return links;
   }
 
   async withHash(hash: string): Promise<LinkTypes> {
@@ -87,7 +98,7 @@ class LinkServices {
   }
 
   async hasThrows(plainHash: string): Promise<void> {
-    const has = await this.hasHash(createHashSha512(plainHash));
+    const has = await this.hasHash(sha512(plainHash));
 
     if (!has) {
       throw new NotFound(`NOT FOUND: link does not exists.`);

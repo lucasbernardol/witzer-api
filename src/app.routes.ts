@@ -1,24 +1,42 @@
 import { Router } from 'express';
-import { celebrate, Segments, Joi } from 'celebrate';
+import isURL from 'validator/lib/isURL';
+
+import Joi from 'joi';
+import { celebrate, Segments } from 'celebrate';
 
 import { HealthController } from '@controllers/health.controller';
 import { MainController } from '@controllers/main.controller';
 
-import { createHashSha512 } from '@utils/crypto/hash.util';
-
-import { hash } from './app.middlewares';
+import { hash } from '@middlewares/hash.middleware';
+import { sha512 } from '@utils/crypto/sha-512.util';
 
 const routes = Router();
 
 const health = new HealthController();
 const controller = new MainController();
 
-const syncValidationHash = (value: any, helpers: any) => {
-  if (!value) {
-    return value;
-  }
+const HOST = process.env.HOST;
 
-  return createHashSha512(value);
+const syncValidationHash = (value: any, helpers: Joi.CustomHelpers<any>) => {
+  // if (!value) {
+  //   return value;
+  // }
+
+  return sha512(value);
+};
+
+const urlValidation = (value: any, helpers: Joi.CustomHelpers<any>) => {
+  const isValidURLAddress = isURL(value, {
+    host_blacklist: [new URL(HOST).host], // prevent redirecting loops (simple domain)
+  });
+
+  if (isValidURLAddress) {
+    return value;
+  } else {
+    return helpers.message({
+      custom: '"href" is not URL or blocked domain',
+    });
+  }
 };
 
 routes.get('/', health.version);
@@ -57,7 +75,7 @@ routes.post(
   '/api/links',
   celebrate({
     [Segments.BODY]: {
-      href: Joi.string().min(10).max(2048).uri().required(), // add URL regex
+      href: Joi.string().min(10).max(2048).required().custom(urlValidation),
     },
   }),
   hash(),

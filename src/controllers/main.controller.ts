@@ -4,8 +4,10 @@ import type { MainControllerInterfaces } from './interfaces/main-controller.inte
 import { StatusCodes } from 'http-status-codes';
 
 import { LinkServices } from '@services/link.services';
+import type { RequestHashing } from '@middlewares/hash.middleware';
+
 import { qrcodeHash } from '@utils/qrcode.util';
-import type { HashProcessOutput } from '../app.middlewares';
+import { reply } from '@utils/reply.util';
 
 enum TYPES {
   JSON = 'json',
@@ -18,6 +20,16 @@ function isTypes(type: string, key: keyof typeof TYPES = 'JSON') {
 
 export class MainController implements MainControllerInterfaces {
   public constructor() {}
+
+  async all(request: Request, response: Response, next: NextFunction) {
+    try {
+      const shorteneds = await LinkServices.all();
+
+      return response.status(StatusCodes.OK).json(reply(shorteneds));
+    } catch (error) {
+      return next(error);
+    }
+  }
 
   async format(request: Request, response: Response, next: NextFunction) {
     try {
@@ -46,11 +58,14 @@ export class MainController implements MainControllerInterfaces {
     try {
       const { hash } = request.params as { hash: string }; // sha256
 
-      const { href, ...deepEntity } = await LinkServices.withHash(hash);
+      //const { href, ...deepEntity } = await LinkServices.withHash(hash);
 
-      response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
+      //response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
+      console.log({ hash });
 
-      await LinkServices.analytics(hash, deepEntity as any);
+      return response.end();
+
+      //await LinkServices.analytics(hash, deepEntity as any);
     } catch (error) {
       return next(error);
     }
@@ -60,9 +75,11 @@ export class MainController implements MainControllerInterfaces {
     try {
       const { href } = request.body as { href: string };
 
-      const { hash, plain } = request?.code as HashProcessOutput; // sha512
+      const { hash, plain } = request?.code as RequestHashing; // sha512
 
-      await LinkServices.create({ href, hash });
+      console.log({ hash, plain });
+
+      //await LinkServices.create({ href, hash });
 
       return response.status(StatusCodes.CREATED).json({ href, hash: plain });
     } catch (error) {

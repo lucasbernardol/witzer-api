@@ -17,6 +17,7 @@
         "alias": {
           "@constants": "./src/constants",
           "@controllers": "./src/controllers",
+          "@middlewares": "./src/middlewares",
           "@services": "./src/services",
           "@models": "./src/models",
           "@query-builder": "./src/query-builder",
@@ -26,5 +27,6 @@
       }
     ]
   ],
-  "comments": false
+  "comments": false,
+  "ignore": ["./src/**/interfaces/*", "./src/@types/**/*"]
 }

@@ -5,6 +5,12 @@ GET http://localhost:3333/ HTTP/1.1
 GET http://localhost:3333/stats HTTP/1.1
 
 
+### QRCODE - "/qrcode/:hash"
+GET http://localhost:3333/api/links/ HTTP/1.1
+Accept: application/json
+
+
+
 ### RESOLVES - "/:hash"
 GET http://localhost:3333/K_frzHL HTTP/1.1
 Accept: application/json
@@ -23,5 +29,5 @@ Content-Type: application/json
 Accept: application/json
 
 {
-	"href": "https://www.google.com/?q=Express.js"
+	"href": "https://www.google.com/?q=Node.js"
 }

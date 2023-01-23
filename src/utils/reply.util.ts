@@ -1,22 +1,26 @@
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 
 // @ts-ignore
 import packages from '../../package.json';
 
 assert.ok(packages?.version, '[PACKAGE.JSON]: version field?');
 
+const URI = process.env.HOST; // example: localhost:3333
+
 export type ReplyFunctionResponses<T = any> = {
+  $uri: string;
   version: string;
-  body?: Partial<T>;
+  data?: Partial<T>;
 };
 
-export type ReplyFunction = <T = any>(body?: T) => ReplyFunctionResponses<T>;
+export type ReplyFunction = <T = any>(data?: T) => ReplyFunctionResponses<T>;
 
-export const reply: ReplyFunction = (body) => {
+export const reply: ReplyFunction = (data) => {
   const { version } = packages as { version: string };
 
   return {
+    $uri: URI,
     version,
-    body,
+    data,
   };
 };

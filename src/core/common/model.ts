@@ -11,7 +11,6 @@ export abstract class Model extends ObjectModel {
 
   abstract created_at: Date;
   abstract updated_at: Date;
-  abstract deleted_at: Date | null;
   abstract _version: number;
 
   /**

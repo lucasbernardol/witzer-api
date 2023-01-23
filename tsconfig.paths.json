@@ -4,6 +4,7 @@
     "paths": {
       "@constants/*": ["constants/*"],
       "@controllers/*": ["controllers/*"],
+      "@middlewares/*": ["middlewares/*"],
       "@query-builder/*": ["query-builder/*"],
       "@models/*": ["models/*"],
       "@core/*": ["core/*"],

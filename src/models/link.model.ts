@@ -16,7 +16,6 @@ export class Link extends Model implements LinkTypes {
   activated_at!: number;
   created_at!: Date;
   updated_at!: Date;
-  deleted_at!: Date | null;
   _version!: number;
 
   static whitelist(): Readonly<Array<LinkTypeRecordKeys>> {
@@ -24,8 +23,11 @@ export class Link extends Model implements LinkTypes {
     return [
 			'id',
       'href',
-			'hash',
+			//'hash',
       'redirectings',
+			'activated_at',
+			'created_at',
+			'updated_at',
       '_version',
 		]
   }

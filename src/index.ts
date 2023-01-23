@@ -1,10 +1,5 @@
 import 'dotenv/config';
 
-import process from 'node:process';
-import { server } from './server';
+import { bootstrap } from './boostrap';
 
-const PORT = process.env.PORT || 3333;
-
-const serverInstance = server.listen(PORT, () => {
-  console.log(`\nPORT: ${PORT}`);
-});
+void bootstrap();
