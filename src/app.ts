@@ -65,6 +65,8 @@ app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
       message: error.message,
     });
   } else {
+    console.log(error);
+
     return response.status(500).json({ message: 'Internal server exception' });
   }
 });

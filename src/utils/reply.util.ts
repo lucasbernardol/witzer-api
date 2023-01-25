@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 
+import dayjs from 'dayjs';
+
 // @ts-ignore
 import packages from '../../package.json';
 
@@ -11,6 +13,7 @@ export type ReplyFunctionResponses<T = any> = {
   $uri: string;
   version: string;
   data?: Partial<T>;
+  _meta?: Record<string, any>;
 };
 
 export type ReplyFunction = <T = any>(data?: T) => ReplyFunctionResponses<T>;
@@ -22,5 +25,11 @@ export const reply: ReplyFunction = (data) => {
     $uri: URI,
     version,
     data,
+    _meta: {
+      timestamp: {
+        format: 'Unix',
+        current: dayjs().unix(),
+      },
+    },
   };
 };

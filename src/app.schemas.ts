@@ -31,13 +31,13 @@ const syncURLTransform = (value: any, helpers: Joi.CustomHelpers<any>) => {
 
 export const HASH_PLAIN: Readonly<SchemaOptions> = {
   [Segments.PARAMS]: Joi.object({
-    hash: Joi.string().min(7).max(7).required(), // ignore "sha512" converton.
+    hash: Joi.string().min(8).max(8).required(), // ignore "sha512" converton.
   }),
 };
 
 export const HASH: Readonly<SchemaOptions> = {
   [Segments.PARAMS]: Joi.object({
-    hash: Joi.string().min(7).max(7).required().custom(syncHashTransform),
+    hash: Joi.string().min(8).max(8).required().custom(syncHashTransform),
   }),
 };
 

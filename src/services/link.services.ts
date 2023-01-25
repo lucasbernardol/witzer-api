@@ -5,14 +5,21 @@ import type {
   QueryBuilder,
 } from 'objection';
 
+import { UniqueViolationError } from 'objection';
+
 import { NotFound } from 'http-errors';
+
+import { InternalServerError } from 'http-errors';
 
 import dayjs from 'dayjs';
 import dayjsUTCPlugin from 'dayjs/plugin/utc';
 
-import { Link } from '@models/link.model';
+import { Link, WhitelistColumns } from '@models/link.model';
+
 import { LinkTypes } from '@models/interfaces/link-model.interface';
 import { sha512 } from '@utils/crypto/sha-512.util';
+
+import { nanoid } from '@utils/nanoid.util';
 
 dayjs.extend(dayjsUTCPlugin);
 
@@ -34,45 +41,93 @@ class LinkServices {
     return this.model.query();
   }
 
-  async all() {
-    const queryBuilder = this.queryBuilder();
-
-    const links = await queryBuilder
-      .select(this.model.whitelist())
-      .limit(100)
-      .execute();
-
-    return links;
+  private whitelist(): WhitelistColumns {
+    return this.model.whitelist();
   }
 
-  async withHash(hash: string): Promise<LinkTypes> {
-    const culums = this.model.whitelist();
+  private withHashColumns() {
+    return this.model.withHashColumns();
+  }
 
-    const queryBuilder = this.queryBuilder(); // Object/knex query builder
+  async withHash(hash: string): Promise<ModelObject<Link>> {
+    const queryBuilder = this.queryBuilder(); // Objetion.js/Knex query builder
 
-    const link = await queryBuilder.findOne({ hash }).select(culums).execute();
+    const culums = this.withHashColumns();
 
-    if (!link) {
-      throw new NotFound(`NOT FOUND: link does not exists.`);
+    const shortened = await queryBuilder
+      .findOne({ hash })
+      .select(culums)
+      .execute();
+
+    if (!shortened) {
+      throw new NotFound();
     }
 
     return {
-      id: link.id,
-      href: link.href,
-      hash: link.hash,
-      redirectings: link.redirectings,
-      _version: link._version,
+      id: shortened.id,
+      href: shortened.href,
+      redirectings: shortened.redirectings,
+      _version: shortened._version,
     } as any;
   }
 
-  async create({ href, hash }: Partial<LinkTypes>): Promise<Link> {
-    const queryBuilder = this.queryBuilder();
+  async create({ href }: Pick<LinkTypes, 'href'>): Promise<ModelObject<Link>> {
+    const columns = this.whitelist() as string[];
 
-    return await queryBuilder.insert({ href, hash }).returning('*').execute();
+    let created: Link | null = null;
+
+    let attempts: number = 0;
+
+    let hash: string = '';
+
+    const entity = ({ href, hash }: PartialModelObject<Link>) => {
+      return {
+        href,
+        hash: sha512(hash as string),
+      };
+    };
+
+    do {
+      const queryBuilder = this.queryBuilder();
+
+      try {
+        const attemptsIsGretherThanMaxRetries = ++attempts > 3;
+
+        if (attemptsIsGretherThanMaxRetries) {
+          throw new InternalServerError(); // Attemps
+        }
+
+        console.log(attempts);
+
+        hash = await nanoid();
+
+        const _entity = entity({ href, hash });
+
+        // prettier-ignore
+        created = await queryBuilder.insert(_entity).returning(columns).execute();
+      } catch (error: any) {
+        if (error instanceof UniqueViolationError) {
+          // Skip/ignore error (try again);
+        } else {
+          throw error;
+        }
+      }
+    } while (!created);
+    // mapper
+    return {
+      id: created.id,
+      href: created.href,
+      hash, // nanoid
+      redirectings: created.redirectings,
+      activated_at: created.activated_at,
+      created_at: created.updated_at,
+      updated_at: created.updated_at,
+      _version: created._version,
+    };
   }
 
   async analytics(hash: string, deepEntity: ModelObject<Link>): Promise<void> {
-    const queryBuilder = this.model.query(); // Object query builder.
+    const queryBuilder = this.queryBuilder(); // Objection query builder.
 
     const _updated: PartialModelObject<Link> = {
       activated_at: dayjs().unix(),

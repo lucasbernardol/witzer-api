@@ -8,17 +8,17 @@ Accept: application/json
 
 
 
-### RESOLVES - "/:hash"
-GET http://localhost:3333/K_frzHL HTTP/1.1
+### REDIRECTINGS - "/:hash"
+GET http://localhost:3333/WrY7li1k HTTP/1.1
 Accept: application/json
 
 
 ### QRCODE - "/qrcode/:hash"
-GET http://localhost:3333/api/links/qrcode/K_frzHL HTTP/1.1
+GET http://localhost:3333/api/links/qrcode/WrY7li1k HTTP/1.1
 Accept: application/json
 
 ### FORMAT - "/format/:hash"
-GET http://localhost:3333/api/links/format/K_frzHL/?type=json HTTP/1.1
+GET http://localhost:3333/api/links/format/WrY7li1k/?type=json HTTP/1.1
 Accept: application/json
 
 
@@ -28,7 +28,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-	"href": "https://google.com/?q=Node.js"
+	"href": "https://google.com/?q=React.js"
 }
 
 

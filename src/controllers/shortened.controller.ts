@@ -2,9 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import type { MainControllerInterfaces } from './interfaces/main-controller.interface';
 
 import { StatusCodes } from 'http-status-codes';
-
 import { LinkServices } from '@services/link.services';
-import type { RequestHashing } from '@middlewares/hash.middleware';
 
 import { qrcodeHash } from '@utils/qrcode.util';
 import { reply } from '@utils/reply.util';
@@ -18,18 +16,8 @@ function isTypes(type: string, key: keyof typeof TYPES = 'JSON') {
   return TYPES[key] === type?.toLowerCase();
 }
 
-export class MainController implements MainControllerInterfaces {
+export class ShortenedController implements MainControllerInterfaces {
   public constructor() {}
-
-  async all(request: Request, response: Response, next: NextFunction) {
-    try {
-      const shorteneds = await LinkServices.all();
-
-      return response.status(StatusCodes.OK).json(reply(shorteneds));
-    } catch (error) {
-      return next(error);
-    }
-  }
 
   async format(request: Request, response: Response, next: NextFunction) {
     try {
@@ -54,34 +42,43 @@ export class MainController implements MainControllerInterfaces {
     }
   }
 
-  async resolves(request: Request, response: Response, next: NextFunction) {
+  /**
+   * @description Redirect/redirectings to original URL with received hash/code.
+   *
+   * @param {Request} request Express.js Request/IncomingMessage object.
+   * @param {Response} response Express.js response object.
+   * @param {NextFunction} next Next function/method.
+   * @returns
+   */
+  async redirectings(request: Request, response: Response, next: NextFunction) {
     try {
       const { hash } = request.params as { hash: string }; // sha256
 
-      //const { href, ...deepEntity } = await LinkServices.withHash(hash);
+      const { href, ...deepEntity } = await LinkServices.withHash(hash);
 
-      //response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
-      console.log({ hash });
+      response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
 
-      return response.end();
-
-      //await LinkServices.analytics(hash, deepEntity as any);
+      await LinkServices.analytics(hash, deepEntity as any);
     } catch (error) {
       return next(error);
     }
   }
 
+  /**
+   * @description Shorting any URL.
+   *
+   * @param {Request} request Express.js Request/IncomingMessage object.
+   * @param {Response} response Express.js response object.
+   * @param {NextFunction} next Next function/method.
+   * @returns
+   */
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       const { href } = request.body as { href: string };
 
-      const { hash, plain } = request?.code as RequestHashing; // sha512
+      const shortened = await LinkServices.create({ href });
 
-      console.log({ hash, plain });
-
-      //await LinkServices.create({ href, hash });
-
-      return response.status(StatusCodes.CREATED).json({ href, hash: plain });
+      return response.status(StatusCodes.CREATED).json(reply(shortened));
     } catch (error) {
       return next(error);
     }

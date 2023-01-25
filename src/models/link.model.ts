@@ -5,6 +5,8 @@ import type { LinkTypes } from './interfaces/link-model.interface';
 
 type LinkTypeRecordKeys = keyof LinkTypes;
 
+export type WhitelistColumns = Readonly<Array<LinkTypeRecordKeys>>;
+
 export class Link extends Model implements LinkTypes {
   static idColumn: string = 'id';
   static tableName: string = tableNames.link;
@@ -18,7 +20,7 @@ export class Link extends Model implements LinkTypes {
   updated_at!: Date;
   _version!: number;
 
-  static whitelist(): Readonly<Array<LinkTypeRecordKeys>> {
+  static whitelist(): WhitelistColumns {
     // prettier-ignore
     return [
 			'id',
@@ -29,6 +31,16 @@ export class Link extends Model implements LinkTypes {
 			'created_at',
 			'updated_at',
       '_version',
+		]
+  }
+
+  static withHashColumns() {
+    // prettier-ignore
+    return [
+			'id',
+			'href',
+			'redirectings',
+			'_version'
 		]
   }
 }
