@@ -10,7 +10,6 @@
     "husky:install": "husky install",
     "postinstall": "yarn husky:install",
     "migrate": "knex migrate:latest",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev:start": "ts-node-dev -r tsconfig-paths/register --transpile-only src/index.ts",
     "dev:watch": "ts-node-dev -r tsconfig-paths/register --transpile-only --respawn src/index.ts"
   },

@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import process from 'node:process';
 import type { Server as HttpServer } from 'node:http';
 
@@ -5,10 +7,16 @@ import { Server } from './server';
 
 const PORT = process.env.PORT || 3333;
 
-export async function bootstrap(): Promise<HttpServer> {
-  const server = Server.listen(PORT, () => {
-    console.log(`\nPORT: ${PORT}`);
-  });
+export async function bootstrap(init = true): Promise<HttpServer> {
+  let server: HttpServer | null = null;
 
-  return server;
+  if (init) {
+    server = Server.listen(PORT, () => {
+      console.log(`\nPORT: ${PORT}`);
+    });
+  } else {
+    server = Server;
+  }
+
+  return server as any;
 }

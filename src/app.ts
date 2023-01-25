@@ -18,12 +18,27 @@ export const app = express();
 
 app.use(compression());
 
+/**
+ * - Content-Types:
+ * 	application/json --> JSON
+ *  application/csp-report --> JSON/LIKE BASED
+ */
 app.use(express.json());
+app.use(express.json({ type: 'application/csp-report' }));
+
 app.use(express.urlencoded({ extended: false }));
 
 app.enable('trust proxy');
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        reportUri: '/report-violation',
+      },
+    },
+  })
+);
 app.use(cors());
 
 app.use(

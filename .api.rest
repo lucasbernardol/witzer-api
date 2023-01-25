@@ -1,12 +1,9 @@
 ### Path: "/"
 GET http://localhost:3333/ HTTP/1.1
+Accept: application/json
 
-### Path: "/stats/x"
+### Path: "/stats"
 GET http://localhost:3333/stats HTTP/1.1
-
-
-### QRCODE - "/qrcode/:hash"
-GET http://localhost:3333/api/links/ HTTP/1.1
 Accept: application/json
 
 
@@ -14,6 +11,7 @@ Accept: application/json
 ### RESOLVES - "/:hash"
 GET http://localhost:3333/K_frzHL HTTP/1.1
 Accept: application/json
+
 
 ### QRCODE - "/qrcode/:hash"
 GET http://localhost:3333/api/links/qrcode/K_frzHL HTTP/1.1
@@ -23,11 +21,24 @@ Accept: application/json
 GET http://localhost:3333/api/links/format/K_frzHL/?type=json HTTP/1.1
 Accept: application/json
 
+
 ### CREATE - "/api/links"
 POST http://localhost:3333/api/links HTTP/1.1
-Content-Type: application/json
 Accept: application/json
+Content-Type: application/json
 
 {
-	"href": "https://www.google.com/?q=Node.js"
+	"href": "https://google.com/?q=Node.js"
+}
+
+
+### CSP REPORT VIOLATION (TESTING)
+POST http://localhost:3333/report-violation HTTP/1.1
+Accept: application/json
+Content-Type: application/csp-report
+
+{
+	"csp-report": {
+		"document-uri": "http://localhost:3333"
+	}
 }
