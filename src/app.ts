@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 import compression from 'compression';
 
-import { isHttpError, NotFound } from 'http-errors';
+import { isHttpError, NotFound, TooManyRequests } from 'http-errors';
 import { errors } from 'celebrate';
 
 import helmet from 'helmet';
@@ -11,6 +11,11 @@ import cors from 'cors';
 
 import morgan from 'morgan';
 import hpp from 'hpp';
+
+import expressRateLimiter from 'express-rate-limit';
+import RedisStore from 'rate-limit-redis'
+
+import { redisClient } from '@lib/redis'
 
 import { routes } from './app.routes';
 
@@ -39,12 +44,31 @@ app.use(
     },
   })
 );
+
 app.use(cors());
 
 app.use(
   hpp({
     checkBody: false,
     checkQuery: true,
+  })
+);
+
+app.use(
+  expressRateLimiter({
+    windowMs: 1 * 60 * 60 * 1000, // 1 hour
+    max: 1500,
+    legacyHeaders: true,
+    handler: (request, response, next) => {
+      return next(
+        new TooManyRequests('Too many requests, please try again later.')
+      );
+    },
+		store: new RedisStore({
+			prefix: '@ratelimiter-global',
+			// @ts-expect-error
+			sendCommand: (...args: string[]) => redisClient.call(...args),
+		})
   })
 );
 
