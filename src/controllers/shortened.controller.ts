@@ -4,7 +4,10 @@ import type { ShortenedControllerMethods } from '@controllers/interfaces/shorten
 import { StatusCodes } from 'http-status-codes';
 import { LinkServices } from '@services/link.services';
 
+import { redisClient } from '@lib/redis';
+
 import { qrcodeHash } from '@utils/qrcode.util';
+import { cacheKey } from '@utils/cache.util';
 import { reply } from '@utils/reply.util';
 
 enum TYPES {
@@ -50,6 +53,9 @@ class ShortenedController implements ShortenedControllerMethods {
       const { hash } = request.params as { hash: string }; // sha256
 
       const { href } = await LinkServices.withHash(hash);
+
+      // Redis cache (10 minutes)
+      await redisClient.set(cacheKey(request), href, 'EX', 10 * 60);
 
       return response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
     } catch (error) {

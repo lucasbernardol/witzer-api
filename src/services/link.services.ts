@@ -104,8 +104,6 @@ class LinkServices {
           throw new InternalServerError(); // Attemps
         }
 
-        console.log(attempts);
-
         hash = await nanoid();
 
         const _entity = entity({ href, hash });

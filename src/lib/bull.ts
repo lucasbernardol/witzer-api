@@ -16,9 +16,13 @@ export const analyticsQueue = new Bull<AnalyticsQueueData>(
       port: Number(process.env.REDIS_PORT) || 6379,
       username: process.env.REDIS_USERNAME,
       password: process.env.REDIS_PASSWORD,
-      tls: {
-        host: process.env.REDIS_HOST, // tsl string
-      },
+      tls:
+        process.env.REDIS_HOST !== 'localhost' &&
+        process.env.REDIS_HOST !== '127.0.0.1'
+          ? {
+              host: process.env.REDIS_HOST,
+            }
+          : undefined,
     },
   }
 ); // @localhost
@@ -30,7 +34,7 @@ analyticsQueue.process((job, callback) =>
 analyticsQueue.on('completed', async (job, result) => {
   await job.remove();
 
-  console.log(result);
+  //console.log(result);
 });
 
 analyticsQueue.on('failed', console.error);

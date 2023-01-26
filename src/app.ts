@@ -13,9 +13,9 @@ import morgan from 'morgan';
 import hpp from 'hpp';
 
 import expressRateLimiter from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis'
+import RedisStore from 'rate-limit-redis';
 
-import { redisClient } from '@lib/redis'
+import { redisClient } from '@lib/redis';
 
 import { routes } from './app.routes';
 
@@ -54,6 +54,7 @@ app.use(
   })
 );
 
+/*
 app.use(
   expressRateLimiter({
     windowMs: 1 * 60 * 60 * 1000, // 1 hour
@@ -70,7 +71,7 @@ app.use(
 			sendCommand: (...args: string[]) => redisClient.call(...args),
 		})
   })
-);
+); */
 
 app.use(morgan('dev'));
 app.use(routes);

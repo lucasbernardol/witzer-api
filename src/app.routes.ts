@@ -7,8 +7,9 @@ import { HealthController } from '@controllers/health.controller';
 import { ReportController } from '@controllers/report-violation.controller';
 
 import { ShortenedController } from '@controllers/shortened.controller';
+import { cacheMiddleware } from '@middlewares/cache.middleware';
 
-import { celebrate, HASH_PLAIN, HASH, BODY } from './app.schemas';
+import { celebrate, HASH_PLAIN, HASH_QUERY, HASH, BODY } from './app.schemas';
 import { redisClient } from '@lib/redis';
 
 const routes = Router();
@@ -36,6 +37,7 @@ routes.get(
     }),
   }),
   celebrate(HASH),
+  cacheMiddleware(),
   ShortenedController.redirectings
 );
 
@@ -44,7 +46,7 @@ routes.get(
  */
 routes.get(
   '/api/links/format/:hash',
-  celebrate(HASH),
+  celebrate(HASH_QUERY),
   ShortenedController.format
 );
 routes.get(
