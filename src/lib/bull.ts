@@ -9,7 +9,18 @@ export type AnalyticsQueueData = {
 };
 
 export const analyticsQueue = new Bull<AnalyticsQueueData>(
-  ANALYTICS_QUEUE_NAME
+  ANALYTICS_QUEUE_NAME,
+  {
+    redis: {
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT) || 6379,
+      username: process.env.REDIS_USERNAME,
+      password: process.env.REDIS_PASSWORD,
+      tls: {
+        host: process.env.REDIS_HOST, // tsl string
+      },
+    },
+  }
 ); // @localhost
 
 analyticsQueue.process((job, callback) =>
