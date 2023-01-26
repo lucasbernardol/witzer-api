@@ -22,6 +22,7 @@
           "@models": "./src/models",
           "@query-builder": "./src/query-builder",
           "@core": "./src/core",
+          "@lib": "./src/lib",
           "@utils": "./src/utils"
         }
       }
