@@ -7,6 +7,8 @@ import type {
 
 import { UniqueViolationError } from 'objection';
 
+import { analyticsQueue } from '@lib/bull';
+
 import { NotFound } from 'http-errors';
 
 import { InternalServerError } from 'http-errors';
@@ -49,19 +51,24 @@ class LinkServices {
     return this.model.withHashColumns();
   }
 
-  async withHash(hash: string): Promise<ModelObject<Link>> {
-    const queryBuilder = this.queryBuilder(); // Objetion.js/Knex query builder
+  async withHash(hash: string): Promise<{ href: string }> {
+    const query = this.queryBuilder(); // Objetion.js/Knex query builder
 
     const culums = this.withHashColumns();
 
-    const shortened = await queryBuilder
-      .findOne({ hash })
-      .select(culums)
-      .execute();
+    const shortened = await query.findOne({ hash }).select(culums).execute();
 
     if (!shortened) {
       throw new NotFound();
     }
+
+    await analyticsQueue.add(
+      { hash },
+      {
+        attempts: 5,
+        delay: 1000,
+      }
+    );
 
     return {
       id: shortened.id,
@@ -141,7 +148,12 @@ class LinkServices {
   async fullAnalytics(hash: string) {
     const queryBuilder = this.queryBuilder();
 
-    const deepEntity = (await queryBuilder.findOne({ hash }).execute()) as Link;
+    const columns = this.withHashColumns();
+
+    const deepEntity = (await queryBuilder
+      .findOne({ hash })
+      .select(columns)
+      .execute()) as Link;
 
     const _updated: PartialModelObject<Link> = {
       activated_at: dayjs().unix(),
@@ -152,11 +164,11 @@ class LinkServices {
     await queryBuilder.update(_updated).where({ hash }).execute();
   }
 
-  async hasThrows(plainHash: string): Promise<void> {
-    const has = await this.hasHash(sha512(plainHash));
+  async hasWithPlainHashOrThrows(hash: string): Promise<void> {
+    const hasEntityOrRecord = await this.hasHash(sha512(hash));
 
-    if (!has) {
-      throw new NotFound(`NOT FOUND: link does not exists.`);
+    if (!hasEntityOrRecord) {
+      throw new NotFound();
     }
   }
 

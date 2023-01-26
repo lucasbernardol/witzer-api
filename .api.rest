@@ -2,24 +2,20 @@
 GET http://localhost:3333/ HTTP/1.1
 Accept: application/json
 
-### Path: "/stats"
-GET http://localhost:3333/stats HTTP/1.1
-Accept: application/json
-
 
 
 ### REDIRECTINGS - "/:hash"
-GET http://localhost:3333/WrY7li1k HTTP/1.1
+GET http://localhost:3333/J-gyaZGb HTTP/1.1
 Accept: application/json
 
-
 ### QRCODE - "/qrcode/:hash"
-GET http://localhost:3333/api/links/qrcode/WrY7li1k HTTP/1.1
+GET http://localhost:3333/api/links/qrcode/J-gyaZGb HTTP/1.1
 Accept: application/json
 
 ### FORMAT - "/format/:hash"
-GET http://localhost:3333/api/links/format/WrY7li1k/?type=json HTTP/1.1
+GET http://localhost:3333/api/links/format/J-gyaZGb/?type=json HTTP/1.1
 Accept: application/json
+
 
 
 ### CREATE - "/api/links"
@@ -28,8 +24,9 @@ Accept: application/json
 Content-Type: application/json
 
 {
-	"href": "https://www.google.com/?q=React.js"
+	"href": "https://www.google.com/?q=Axios.js"
 }
+
 
 
 ### CSP REPORT VIOLATION (TESTING)

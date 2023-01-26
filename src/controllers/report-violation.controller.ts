@@ -1,24 +1,33 @@
 import type { Request, Response, NextFunction } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import type { ReportViolationControllerMethods } from '@controllers/interfaces/report-controller.interface';
 
+import { StatusCodes } from 'http-status-codes';
 import { CSP_REPORT } from '@constants/string.constants';
 
-interface ReportViolationController {
-  report(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ): Promise<any>;
-}
+class ReportController implements ReportViolationControllerMethods {
+  private static instance: ReportController;
 
-export class ReportController implements ReportViolationController {
+  private static has(): boolean {
+    return !!this.instance; /* converts to boolean */
+  }
+
+  static get(): ReportController {
+    const hasNoReportControllerInstances = !this.has();
+
+    if (hasNoReportControllerInstances) {
+      this.instance = new ReportController();
+    }
+
+    return ReportController.instance;
+  }
+
   /**
    * @description ReportController `constructor` method.
-   * @public constructor
+   * @private constructor
    */
-  public constructor() {}
+  private constructor() {}
 
-  async report(request: Request, response: Response, next: NextFunction) {
+  async csp(request: Request, response: Response, next: NextFunction) {
     try {
       const body = request.body as { [CSP_REPORT]: Record<string, any> };
 
@@ -32,3 +41,7 @@ export class ReportController implements ReportViolationController {
     }
   }
 }
+
+const reportController = ReportController.get();
+
+export { reportController as ReportController };

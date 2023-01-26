@@ -39,6 +39,14 @@ export const HASH: Readonly<SchemaOptions> = {
   [Segments.PARAMS]: Joi.object({
     hash: Joi.string().min(8).max(8).required().custom(syncHashTransform),
   }),
+  [Segments.QUERY]: Joi.object({
+    type: Joi.string()
+      .min(3)
+      .max(4)
+      .valid(...['json', 'raw'])
+      .default('raw')
+      .optional(),
+  }),
 };
 
 export const BODY: Readonly<SchemaOptions> = {

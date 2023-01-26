@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import type { MainControllerInterfaces } from './interfaces/main-controller.interface';
+import type { ShortenedControllerMethods } from '@controllers/interfaces/shortened-controller.interface';
 
 import { StatusCodes } from 'http-status-codes';
 import { LinkServices } from '@services/link.services';
@@ -12,35 +12,30 @@ enum TYPES {
   RAW = 'raw',
 }
 
-function isTypes(type: string, key: keyof typeof TYPES = 'JSON') {
-  return TYPES[key] === type?.toLowerCase();
-}
+const CONTENT_TYPE = 'image/png' as const;
 
-export class ShortenedController implements MainControllerInterfaces {
-  public constructor() {}
+class ShortenedController implements ShortenedControllerMethods {
+  private static instance: ShortenedController;
 
-  async format(request: Request, response: Response, next: NextFunction) {
-    try {
-      const { hash } = request.params as { hash: string };
-
-      const query = request.query as { type: string };
-
-      const queryResponseTyped = query?.type || TYPES['RAW'];
-
-      const { href, ...deepEntity } = await LinkServices.withHash(hash);
-
-      if (isTypes(queryResponseTyped) /* JON */) {
-        response.status(StatusCodes.OK).json({ href });
-        // return
-      } else {
-        response.status(StatusCodes.OK).send(href);
-      }
-
-      await LinkServices.analytics(deepEntity.hash, deepEntity as any);
-    } catch (error) {
-      return next(error);
-    }
+  private static has(): boolean {
+    return !!ShortenedController.instance;
   }
+
+  static get(): ShortenedController {
+    const hasNoShortenedControllerInstances = !this.has();
+
+    if (hasNoShortenedControllerInstances) {
+      this.instance = new ShortenedController();
+    }
+
+    return ShortenedController.instance;
+  }
+
+  /**
+   * @description ShortenedController `constructor` method/function.
+   * @private constructor
+   */
+  private constructor() {}
 
   /**
    * @description Redirect/redirectings to original URL with received hash/code.
@@ -54,11 +49,27 @@ export class ShortenedController implements MainControllerInterfaces {
     try {
       const { hash } = request.params as { hash: string }; // sha256
 
-      const { href, ...deepEntity } = await LinkServices.withHash(hash);
+      const { href } = await LinkServices.withHash(hash);
 
-      response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
+      return response.status(StatusCodes.MOVED_PERMANENTLY).redirect(href);
+    } catch (error) {
+      return next(error);
+    }
+  }
 
-      await LinkServices.analytics(hash, deepEntity as any);
+  async format(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { hash } = request.params as { hash: string }; // sha512
+
+      const query = request.query as { type: string };
+
+      const { href } = await LinkServices.withHash(hash);
+
+      if (query?.type === TYPES['JSON']) {
+        return response.status(StatusCodes.OK).json({ href });
+      }
+
+      return response.status(StatusCodes.OK).send(href);
     } catch (error) {
       return next(error);
     }
@@ -86,20 +97,19 @@ export class ShortenedController implements MainControllerInterfaces {
 
   async qrcode(request: Request, response: Response, next: NextFunction) {
     try {
-      const { hash } = request.params as { hash: string }; // plain/text
+      const { hash } = request.params as { hash: string }; /* plain/text */
 
-      // verificar se existe um registro
-      // gerar qrcode baseado no hash (plain text) recebido
-      await LinkServices.hasThrows(hash);
+      await LinkServices.hasWithPlainHashOrThrows(hash);
 
       const qrcode = await qrcodeHash(hash);
 
-      // Content-type: 'image/png'
-      response.type('image/png');
-
-      return response.status(StatusCodes.OK).send(qrcode);
+      return response.status(StatusCodes.OK).type(CONTENT_TYPE).send(qrcode);
     } catch (error) {
       return next(error);
     }
   }
 }
+
+const shortenedController = ShortenedController.get();
+
+export { shortenedController as ShortenedController };
