@@ -1,0 +1,12 @@
+### sJ6mSPdYuFEo
+
+POST http://localhost:3333/api/v1/shorts HTTP/1.1
+Content-Type: application/json
+
+{
+  "href": "https://google.com"
+}
+
+### aaaa
+GET http://localhost:3333/api/v1/shorts/sJ6mSPdYuFEo HTTP/1.1
+Content-Type: application/json

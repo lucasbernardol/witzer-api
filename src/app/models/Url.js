@@ -1,5 +1,12 @@
 import mongoose, { Schema } from 'mongoose';
 
+import { customAlphabet } from 'nanoid';
+import dictionary from 'nanoid-dictionary';
+
+import constants from '../../constants/nanoid.js';
+
+const nanoid = customAlphabet(dictionary.alphanumeric, constants.LENGTH); // 12
+
 const schema = new Schema(
   {
     href: {
@@ -14,6 +21,7 @@ const schema = new Schema(
       require: true,
       maxLength: 12,
       unique: true,
+      default: () => nanoid(),
     },
 
     redirectings: {
