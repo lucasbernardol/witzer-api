@@ -1,10 +1,5 @@
 import 'dotenv/config';
 
-import process from 'node:process';
-import { app } from './app.js';
+import bootstrap from './server.js';
 
-const PORT = Number(process.env?.PORT ?? 3333);
-
-app.listen(PORT, () => {
-  console.log(`\nPORT:${PORT}`);
-});
+void bootstrap(); // Run api
