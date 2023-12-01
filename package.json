@@ -7,5 +7,13 @@
   "license": "MIT",
   "devDependencies": {
     "prettier": "^3.1.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "morgan": "^1.10.0"
   }
 }
