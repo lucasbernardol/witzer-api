@@ -3,6 +3,9 @@ import ShortenController from '../../controllers/ShortenController.js';
 
 const controller = new ShortenController();
 
-const router = Router();
+const routes = Router();
 
-export default router;
+routes.get('/shorts/:hash/resolve', controller.resolving);
+routes.post('/shorts', controller.create);
+
+export default routes;

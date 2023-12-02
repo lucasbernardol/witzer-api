@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 import mongoose, { Schema } from 'mongoose';
-import { nanoid } from '../utils/nanoid';
+import { nanoid } from '../utils/nanoid.js';
 
 const schema = new Schema(
   {

@@ -1,12 +1,22 @@
-### sJ6mSPdYuFEo
+### /
+GET http://localhost:3333/ HTTP/1.1
+Content-Type: application/json
 
+
+
+### RESOLVING - format (json|raw)
+GET http://localhost:3333/api/v1/shorts/T4vToQrXEF6o/resolve?format=raw HTTP/1.1
+Accept: application/json
+
+
+### CREATE - T4vToQrXEF6o
 POST http://localhost:3333/api/v1/shorts HTTP/1.1
 Content-Type: application/json
+Accept: application/json
 
 {
   "href": "https://google.com"
 }
 
-### aaaa
-GET http://localhost:3333/api/v1/shorts/sJ6mSPdYuFEo HTTP/1.1
-Content-Type: application/json
+
+
