@@ -8,9 +8,9 @@ const schema = new Schema(
       maxLength: 2048,
       trim: true,
     },
-    urlId: {
+    shortenId: {
       type: Types.ObjectId,
-      ref: 'Url',
+      ref: 'Shorten',
     },
   },
   { timestamps: true },

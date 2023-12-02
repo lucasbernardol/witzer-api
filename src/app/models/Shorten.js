@@ -1,14 +1,17 @@
+import crypto from 'node:crypto';
+
 import mongoose, { Schema } from 'mongoose';
-
-import { customAlphabet } from 'nanoid';
-import dictionary from 'nanoid-dictionary';
-
-import constants from '../../constants/nanoid.js';
-
-const nanoid = customAlphabet(dictionary.alphanumeric, constants.LENGTH); // 12
+import { nanoid } from '../utils/nanoid';
 
 const schema = new Schema(
   {
+    uuid: {
+      type: String,
+      require: false,
+      index: true,
+      default: () => crypto.randomUUID(), // testing only
+    },
+
     href: {
       type: String,
       require: true,
@@ -32,4 +35,4 @@ const schema = new Schema(
   { timestamps: true },
 );
 
-export const Url = mongoose.model('Url', schema);
+export const Shorten = mongoose.model('Shorten', schema);

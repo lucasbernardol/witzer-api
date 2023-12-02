@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import { routes } from './app/routes/index.js';
+import { routes } from './app/routes/v1/index.js'; // v1 routes
 
 export const app = express();
 
