@@ -5,11 +5,11 @@ Content-Type: application/json
 
 
 ### RESOLVING - format (json|raw)
-GET http://localhost:3333/api/v1/shorts/T4vToQrXEF6o/resolve?format=raw HTTP/1.1
+GET http://localhost:3333/api/v1/shorts/Kmm9YQng1TdW/resolve?format HTTP/1.1
 Accept: application/json
+User-Agent: testing-agent
 
-
-### CREATE - T4vToQrXEF6o
+### CREATE - Kmm9YQng1TdW
 POST http://localhost:3333/api/v1/shorts HTTP/1.1
 Content-Type: application/json
 Accept: application/json
@@ -18,5 +18,7 @@ Accept: application/json
   "href": "https://google.com"
 }
 
-
-
+### DELETE
+DELETE http://localhost:3333/api/v1/shorts/Kmm9YQng1TdW HTTP/1.1
+Content-Type: application/json
+Accept: application/json
