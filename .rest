@@ -4,7 +4,7 @@ Content-Type: application/json
 
 
 ### / VIEWS
-GET http://localhost:3333/api/v1/shorts/ZPNKpC2UzVEu/views HTTP/1.1
+GET http://localhost:3333/api/v1/shorts/ZPNKpC2UzVEu/viewsx HTTP/1.1
 Content-Type: application/json
 
 
