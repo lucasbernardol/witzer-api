@@ -1,6 +1,12 @@
 import { Analytic } from '../models/Analytic.js';
 
 export class AnalyticService {
+  async total() {
+    const total = await Analytic.countDocuments();
+
+    return { total };
+  }
+
   async create(analytic) {
     const { userAgent, shortenId } = analytic; // Props
 

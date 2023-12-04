@@ -3,6 +3,8 @@ import AnalyticsController from '../../controllers/AnalyticsController.js';
 
 const controller = new AnalyticsController();
 
-const router = Router();
+const routes = Router();
 
-export default router;
+routes.get('/analytics', controller.total);
+
+export default routes;
