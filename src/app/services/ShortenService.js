@@ -1,10 +1,17 @@
 import mongoose from 'mongoose';
+import HttpErrors from 'http-errors';
 
+import AnalyticServices from './AnalyticService.js';
 import { Shorten } from '../models/Shorten.js';
-import { Analytic } from '../models/Analytic.js';
+
+const { BadRequest } = HttpErrors;
 
 export class ShortenService {
   #allowFields = ['_id', 'href', 'hash'];
+
+  constructor(analyticServices) {
+    this.analyticServices = analyticServices;
+  }
 
   async create({ href }) {
     const instance = await Shorten.create({
@@ -23,7 +30,7 @@ export class ShortenService {
     const shorten = await Shorten.findOne({ hash }).select(fields).lean();
 
     if (!shorten) {
-      throw new Error('Shorten not found');
+      throw new BadRequest('Shorten not found! Try again later.');
     }
 
     await this.#analyticsTransaction({
@@ -34,36 +41,46 @@ export class ShortenService {
     return shorten.href; // original url
   }
 
+  async views({ hash }) {
+    const shorten = await Shorten.findOne({ hash })
+      .select(['redirectings'])
+      .lean()
+      .exec();
+
+    if (!shorten) {
+      throw new BadRequest('Shorten not found. Try again later.');
+    }
+
+    return shorten.redirectings;
+  }
+
   async delete({ hash }) {
     const shorten = await Shorten.findOne({ hash }).select(['_id']).exec();
 
     if (!shorten) {
-      throw new Error('Shorten not found.');
+      throw new BadRequest('Shorten not found! Try again later.');
     }
 
     const shortenId = shorten._id;
 
-    await Shorten.deleteOne({ _id: shortenId });
+    await this.#removeManyAnalytics({ shortenId });
 
-    await Analytic.deleteMany({ shortenId }); // Cascading remove
+    await Shorten.deleteOne({ _id: shortenId });
   }
 
+  //-- private metthods --
+
   async #analyticsTransaction({ shortenId, userAgent }) {
-    // Clicks
     const session = await mongoose.connection.startSession();
 
     await session.withTransaction(async () => {
-      await Analytic.create(
-        [
-          {
-            userAgent,
-            shortenId,
-          },
-        ],
-        {
-          session,
+      await this.analyticServices.createWithContext({
+        analytic: {
+          userAgent,
+          shortenId,
         },
-      );
+        session,
+      });
 
       await Shorten.updateOne(
         { _id: shortenId },
@@ -78,9 +95,13 @@ export class ShortenService {
       );
     });
 
-    //*await session.commitTransaction();
+    // await session.commitTransaction();
     await session.endSession();
+  }
+
+  async #removeManyAnalytics({ shortenId }) {
+    await this.analyticServices.removeManyByShorten({ shortenId });
   }
 }
 
-export default new ShortenService();
+export default new ShortenService(AnalyticServices);

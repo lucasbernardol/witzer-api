@@ -1,15 +1,13 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { ShortenService } from '../services/ShortenService.js';
+import ShortenServices from '../services/ShortenService.js';
 
 export default class ShortenController {
-  async create(request, response) {
+  async create(request, response, next) {
     try {
       const { href } = request.body;
 
-      const services = new ShortenService();
-
-      const shorten = await services.create({ href });
+      const shorten = await ShortenServices.create({ href });
 
       return response.status(StatusCodes.CREATED).json(shorten);
     } catch (error) {
@@ -17,17 +15,41 @@ export default class ShortenController {
     }
   }
 
-  async resolving(request, response, next) {
-    const { hash } = request.params;
-
-    const format = request.query?.format ?? 'json';
-
-    const userAgent = request.get('user-agent') ?? 'unknown';
-
+  async views(request, response, next) {
     try {
-      const services = new ShortenService();
+      const { hash } = request.params;
 
-      const href = await services.resolving({ hash, userAgent });
+      const views = await ShortenServices.views({ hash });
+
+      return response.status(StatusCodes.OK).json({ views });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async redirecting(request, response, next) {
+    try {
+      const { hash } = request.params;
+
+      const userAgent = request.userAgent; // browser agent or "unknown"
+
+      const href = await ShortenServices.resolving({ hash, userAgent });
+
+      return response.status(StatusCodes.MOVED_TEMPORARILY).redirect(href);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async resolving(request, response, next) {
+    try {
+      const { hash } = request.params;
+
+      const format = request.query?.format ?? 'json';
+
+      const userAgent = request.userAgent;
+
+      const href = await ShortenServices.resolving({ hash, userAgent });
 
       response.status(StatusCodes.OK);
 
@@ -42,12 +64,10 @@ export default class ShortenController {
   }
 
   async delete(request, response, next) {
-    const { hash } = request.params;
-
     try {
-      const services = new ShortenService();
+      const { hash } = request.params;
 
-      await services.delete({ hash });
+      await ShortenServices.delete({ hash });
 
       return response.status(StatusCodes.NO_CONTENT).end();
     } catch (error) {

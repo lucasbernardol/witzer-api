@@ -8,6 +8,7 @@ const schema = new Schema(
       maxLength: 2048,
       trim: true,
     },
+
     shortenId: {
       type: Types.ObjectId,
       ref: 'Shorten',
