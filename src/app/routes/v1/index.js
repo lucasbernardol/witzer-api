@@ -1,25 +1,14 @@
-import assert from 'node:assert/strict';
 import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import { AppController } from '../../controllers/AppController.js';
 
 import ShortenRouter from './shorten.routes.js';
 import AnalyticsRouter from './analytics.routes.js';
 
-import pkg from '../../../../package.json' assert { type: 'json' };
-
-assert.ok(pkg?.version, '[package.json]');
+const controller = new AppController();
 
 export const routes = Router();
 
-routes.get('/', (request, response, next) => {
-  try {
-    const { version } = pkg;
-
-    return response.status(StatusCodes.OK).json({ version });
-  } catch (error) {
-    return next(error);
-  }
-});
+routes.get('/', controller.version);
 
 /**a
  * Api routes
