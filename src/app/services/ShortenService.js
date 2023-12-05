@@ -7,21 +7,23 @@ import { Shorten } from '../models/Shorten.js';
 const { BadRequest } = HttpErrors;
 
 export class ShortenService {
-  #allowFields = ['_id', 'href', 'hash'];
+  // prettier-ignore
+  #allowFields = [
+    '_id', 
+    'href', 
+    'hash'
+  ];
 
   constructor(analyticServices) {
     this.analyticServices = analyticServices;
   }
 
-  async create({ href }) {
-    const instance = await Shorten.create({
-      href,
+  async create(shorten) {
+    const { href, hash } = await Shorten.create({
+      href: shorten.href,
     });
 
-    return {
-      href: instance.href,
-      hash: instance.hash,
-    };
+    return { href, hash };
   }
 
   async resolving({ hash, userAgent }) {

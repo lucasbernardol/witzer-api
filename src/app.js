@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import hpp from 'hpp';
+import { errors } from 'celebrate';
 
 import { notFoundError } from './app/middlewares/notFoundError.js';
 import { errorHandler } from './app/middlewares/errorHandler.js';
@@ -27,10 +28,12 @@ app.use(morgan('dev'));
 app.use(hpp());
 
 //app.use(isRobot());
-app.use(userAgent()); // get current Agent
+app.use(userAgent());
 
 app.use(routes);
 
 app.use(notFoundError());
+
+app.use(errors()); // celebrate error handling
 
 app.use(errorHandler());

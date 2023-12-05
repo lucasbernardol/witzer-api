@@ -5,7 +5,7 @@ import pkg from '../../../package.json' assert { type: 'json' };
 
 assert.ok(pkg?.version, '[package.json]');
 
-export class AppController {
+export default class AppController {
   async version(request, response, next) {
     try {
       const { version } = pkg;
