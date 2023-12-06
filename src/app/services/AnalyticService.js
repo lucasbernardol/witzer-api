@@ -22,7 +22,7 @@ export class AnalyticService {
     const redirectings = await this.#totalDocuments();
 
     await redisClient.set(this.cacheKey, redirectings.toString(), {
-      EX: redisConstants.analyticExpiresIn,
+      EX: redisConstants.totalAnalyticExpiresIn,
     });
 
     return { redirectings };
