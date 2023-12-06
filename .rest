@@ -33,7 +33,7 @@ Accept: application/json
 }
 
 ### DELETE
-DELETE http://localhost:3333/api/v1/shorts/eXaaTQFxtJm8E HTTP/1.1
+DELETE http://localhost:3333/api/v1/shorts/XaaTQFxtJm8E HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
