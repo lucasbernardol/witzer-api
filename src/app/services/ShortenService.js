@@ -4,6 +4,9 @@ import HttpErrors from 'http-errors';
 import AnalyticServices from './AnalyticService.js';
 import { Shorten } from '../models/Shorten.js';
 
+import { redisClient } from '../../modules/redis/client.js';
+import redisConstants from '../../common/constants/redis.js';
+
 const { BadRequest } = HttpErrors;
 
 export class ShortenService {
@@ -38,12 +41,23 @@ export class ShortenService {
     await this.#analyticsTransaction({
       userAgent,
       shortenId: shorten._id,
+      hash,
     });
 
     return shorten.href; // original url
   }
 
   async views({ hash }) {
+    const viewsCacheKey = this.#viewsCachingKey(hash);
+
+    const cachingViews = await redisClient.get(viewsCacheKey);
+
+    if (cachingViews) {
+      return {
+        views: Number(cachingViews),
+      };
+    }
+
     const shorten = await Shorten.findOne({ hash })
       .select(['redirectings'])
       .lean()
@@ -53,7 +67,13 @@ export class ShortenService {
       throw new BadRequest('Shorten not found. Try again later.');
     }
 
-    return shorten.redirectings;
+    const views = shorten.redirectings;
+
+    await redisClient.set(viewsCacheKey, views, {
+      EX: redisConstants.totalAnalyticsHashExpiresIn,
+    });
+
+    return { views };
   }
 
   async delete({ hash }) {
@@ -72,7 +92,7 @@ export class ShortenService {
 
   //-- private metthods --
 
-  async #analyticsTransaction({ shortenId, userAgent }) {
+  async #analyticsTransaction({ shortenId, userAgent, hash }) {
     const session = await mongoose.connection.startSession();
 
     await session.withTransaction(async () => {
@@ -99,10 +119,26 @@ export class ShortenService {
 
     // await session.commitTransaction();
     await session.endSession();
+
+    await this.#viewsCachingHook({ hash });
   }
 
   async #removeManyAnalytics({ shortenId }) {
     await this.analyticServices.removeManyByShorten({ shortenId });
+  }
+
+  #viewsCachingKey(hash) {
+    return `views:${hash}`;
+  }
+
+  async #viewsCachingHook({ hash }) {
+    const currentViewsKey = this.#viewsCachingKey(hash);
+
+    const isValid = await redisClient.exists(currentViewsKey);
+
+    if (isValid) {
+      await redisClient.incr(currentViewsKey);
+    }
   }
 }
 

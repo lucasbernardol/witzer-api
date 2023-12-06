@@ -19,7 +19,7 @@ export default class ShortenController {
     try {
       const { hash } = request.params;
 
-      const views = await ShortenServices.views({ hash });
+      const { views } = await ShortenServices.views({ hash });
 
       return response.status(StatusCodes.OK).json({ views });
     } catch (error) {

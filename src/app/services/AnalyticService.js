@@ -1,10 +1,37 @@
 import { Analytic } from '../models/Analytic.js';
 
-export class AnalyticService {
-  async total() {
-    const total = await Analytic.countDocuments();
+import { redisClient } from '../../modules/redis/client.js';
+import redisConstants from '../../common/constants/redis.js';
 
-    return { total };
+export class AnalyticService {
+  #totalCachekey = 'analytics:total';
+
+  get cacheKey() {
+    return this.#totalCachekey;
+  }
+
+  async totalWithCache() {
+    const totalRedirectings = await redisClient.get(this.cacheKey);
+
+    if (totalRedirectings) {
+      return {
+        redirectings: Number(totalRedirectings), // convert to number
+      };
+    }
+
+    const redirectings = await this.#totalDocuments();
+
+    await redisClient.set(this.cacheKey, redirectings.toString(), {
+      EX: redisConstants.analyticExpiresIn,
+    });
+
+    return { redirectings };
+  }
+
+  async total() {
+    const redirectings = await this.#totalDocuments();
+
+    return { redirectings };
   }
 
   async create(analytic) {
@@ -32,12 +59,29 @@ export class AnalyticService {
       ],
       { session },
     );
+
+    // Update caching if exists
+    await this.#totalAnalyticsCachingHook();
   }
 
   async removeManyByShorten({ shortenId }) {
     await Analytic.deleteMany({
       shortenId,
     });
+  }
+
+  async #totalDocuments() {
+    return await Analytic.countDocuments();
+  }
+
+  async #totalAnalyticsCachingHook() {
+    const currentCacheKey = this.cacheKey;
+
+    const isValidCache = await redisClient.exists(currentCacheKey);
+
+    if (isValidCache) {
+      await redisClient.incr(currentCacheKey);
+    }
   }
 }
 

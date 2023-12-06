@@ -16,5 +16,7 @@ export const errorHandler = () => (error, request, response, next) => {
     };
   }
 
+  console.log(error);
+
   return response.status(exception.status).json(exception);
 };
