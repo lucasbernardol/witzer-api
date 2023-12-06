@@ -31,6 +31,12 @@ const schema = new Schema(
       type: Number,
       default: 0,
     },
+
+    visitedAt: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   { timestamps: true },
 );

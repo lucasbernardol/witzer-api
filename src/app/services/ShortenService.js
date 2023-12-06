@@ -7,6 +7,8 @@ import { Shorten } from '../models/Shorten.js';
 import { redisClient } from '../../modules/redis/client.js';
 import redisConstants from '../../common/constants/redis.js';
 
+import { unix } from '../utils/date.js';
+
 const { BadRequest } = HttpErrors;
 
 export class ShortenService {
@@ -110,6 +112,7 @@ export class ShortenService {
           $inc: {
             redirectings: 1,
           },
+          visitedAt: unix(),
         },
         {
           session,
