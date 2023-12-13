@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 import mongoose, { Schema } from 'mongoose';
-import { nanoid } from '../utils/nanoid.js';
+import { nanoid, constants } from '../utils/nanoid.js';
 
 const schema = new Schema(
   {
@@ -22,7 +22,7 @@ const schema = new Schema(
     hash: {
       type: String,
       require: true,
-      maxLength: 12,
+      maxLength: constants.length, // 8
       unique: true,
       default: () => nanoid(),
     },

@@ -4,7 +4,7 @@ Content-Type: application/json
 
 
 ### REDIRECTINGS
-GET http://localhost:3333/ZPNKpC2UzVEu HTTP/1.1
+GET http://localhost:3333/iP3rVqGH HTTP/1.1
 Accept: application/json
 User-Agent: browser-agent
 
@@ -13,17 +13,17 @@ User-Agent: browser-agent
 
 
 
-### RESOLVEING - format (json|raw)
-GET http://localhost:3333/api/v1/shorts/ZPNKpC2UzVEu/?format=json HTTP/1.1
+### FIND BY HASH
+GET http://localhost:3333/api/v1/shorts/iP3rVqGH HTTP/1.1
 Accept: application/json
 User-Agent: browser-agent
 
 
-### / VIEWS
-GET http://localhost:3333/api/v1/shorts/ZPNKpC2UzVEu/views HTTP/1.1
+### VIEWS
+GET http://localhost:3333/api/v1/shorts/iP3rVqGH/views HTTP/1.1
 Content-Type: application/json
 
-### CREATE - ZPNKpC2UzVEu
+### CREATE - iP3rVqGH
 POST http://localhost:3333/api/v1/shorts HTTP/1.1
 Content-Type: application/json
 Accept: application/json
@@ -33,7 +33,7 @@ Accept: application/json
 }
 
 ### DELETE
-DELETE http://localhost:3333/api/v1/shorts/XaaTQFxtJm8E HTTP/1.1
+DELETE http://localhost:3333/api/v1/shorts/iP3rVqGH HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 

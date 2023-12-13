@@ -24,9 +24,19 @@ export class ShortenService {
   }
 
   async create(shorten) {
-    const { href, hash } = await Shorten.create({
+    const { _id, href, hash } = await Shorten.create({
       href: shorten.href,
     });
+
+    await redisClient.set(
+      hash,
+      JSON.stringify({
+        _id,
+        href,
+        hash,
+      }),
+      { EX: redisConstants.createShortenExpiresIn },
+    );
 
     return { href, hash };
   }
@@ -34,19 +44,66 @@ export class ShortenService {
   async resolving({ hash, userAgent }) {
     const fields = this.#allowFields;
 
-    const shorten = await Shorten.findOne({ hash }).select(fields).lean();
+    let short = await redisClient.get(hash);
 
-    if (!shorten) {
-      throw new BadRequest('Shorten not found! Try again later.');
+    if (!short) {
+      const currentShort = await Shorten.findOne({ hash })
+        .select(fields)
+        .lean();
+
+      if (!currentShort) {
+        throw new BadRequest('Shorten not found! Try again later.');
+      }
+
+      await redisClient.set(hash, JSON.stringify(currentShort), {
+        EX: redisConstants.createShortenExpiresIn,
+      });
+
+      short = currentShort;
+    } else {
+      short = JSON.parse(short);
     }
+
+    // const shorten = await Shorten.findOne({ hash }).select(fields).lean();
+
+    // if (!shorten) {
+    //   throw new BadRequest('Shorten not found! Try again later.');
+    // }
+
+    //console.log(short);
 
     await this.#analyticsTransaction({
       userAgent,
-      shortenId: shorten._id,
+      shortenId: short._id,
       hash,
     });
 
-    return shorten.href; // original url
+    return short.href; // original url
+  }
+
+  async findByPk({ hash }) {
+    const fields = this.#allowFields;
+
+    const shorten = await redisClient.get(hash);
+
+    if (shorten) {
+      return JSON.parse(shorten);
+    }
+
+    const currentShorten = await Shorten.findOne({ hash })
+      .select(fields)
+      .lean()
+      .exec();
+
+    if (!currentShorten) {
+      throw new BadRequest('Shorten not found! Try again later.');
+    }
+
+    await redisClient.set(hash, JSON.stringify(currentShorten), {
+      EX: redisConstants.createShortenExpiresIn,
+    });
+
+    return currentShorten;
   }
 
   async views({ hash }) {
@@ -90,6 +147,8 @@ export class ShortenService {
     await this.#removeManyAnalytics({ shortenId });
 
     await Shorten.deleteOne({ _id: shortenId });
+
+    await this.#removeShortenAndViewsFromCachingHook(hash); // remove from caching
   }
 
   //-- private metthods --
@@ -142,6 +201,12 @@ export class ShortenService {
     if (isValid) {
       await redisClient.incr(currentViewsKey);
     }
+  }
+
+  async #removeShortenAndViewsFromCachingHook(hash) {
+    await redisClient.del(this.#viewsCachingKey(hash));
+
+    await redisClient.del(hash);
   }
 }
 

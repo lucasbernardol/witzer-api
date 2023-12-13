@@ -1,3 +1,3 @@
 export default Object.freeze({
-  length: 12,
+  length: 8,
 });

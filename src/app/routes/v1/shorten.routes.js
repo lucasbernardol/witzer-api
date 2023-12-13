@@ -7,14 +7,11 @@ import { RedisStore } from 'rate-limit-redis';
 import HttpError from 'http-errors';
 
 import ShortenController from '../../controllers/ShortenController.js';
-import { RawOrJson } from '../../validations/types/format.js';
 
 import { hashSchema } from '../../validations/hashSchema.js';
 import { urlSchema } from '../../validations/urlSchema.js';
 
 import { redisClient } from '../../../modules/redis/client.js';
-
-const controller = new ShortenController();
 
 const routes = Router();
 
@@ -47,34 +44,31 @@ const shortDeleteLimiter = rateLimit({
 });
 
 routes.get(
-  '/shorts/:hash/views',
-  celebrate({ [Segments.PARAMS]: hashSchema() }),
-  controller.views,
-);
-
-routes.get(
   '/shorts/:hash',
   celebrate({
     [Segments.PARAMS]: hashSchema(),
-    [Segments.QUERY]: {
-      format: RawOrJson(),
-    },
   }),
-  controller.resolving,
+  ShortenController.findByPK,
 ); // returns original url
+
+routes.get(
+  '/shorts/:hash/views',
+  celebrate({ [Segments.PARAMS]: hashSchema() }),
+  ShortenController.views,
+);
 
 routes.post(
   '/shorts',
   shortCreateLimiter,
   celebrate({ [Segments.BODY]: urlSchema() }),
-  controller.create,
+  ShortenController.create,
 );
 
 routes.delete(
   '/shorts/:hash',
   shortDeleteLimiter,
   celebrate({ [Segments.PARAMS]: hashSchema() }),
-  controller.delete,
+  ShortenController.delete,
 );
 
 export default routes;

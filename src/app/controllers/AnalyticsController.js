@@ -1,15 +1,15 @@
 import { StatusCodes } from 'http-status-codes';
 import AnalyicsServices from '../services/AnalyticService.js';
 
-export default class AnalyticsController {
+export class AnalyticsController {
   /**
    * All redirections
    * @param {import('express').Request} request `req` object.
-   * @param {import('express').Request} response `res` object.
-   * @param {import('express').Request} next next route.
+   * @param {import('express').Response} response `res` object.
+   * @param {import('express').NextFunction} next next route.
    * @returns
    */
-  async total(request, response, next) {
+  async analytics(request, response, next) {
     try {
       const { redirectings } = await AnalyicsServices.totalWithCache();
 
@@ -19,3 +19,5 @@ export default class AnalyticsController {
     }
   }
 }
+
+export default new AnalyticsController();

@@ -1,20 +1,14 @@
 import { StatusCodes } from 'http-status-codes';
-
 import ShortenServices from '../services/ShortenService.js';
 
-export default class ShortenController {
-  async create(request, response, next) {
-    try {
-      const { href } = request.body;
-
-      const shorten = await ShortenServices.create({ href });
-
-      return response.status(StatusCodes.CREATED).json(shorten);
-    } catch (error) {
-      return next(error);
-    }
-  }
-
+export class ShortenController {
+  /**
+   * Total views
+   * @param {import('express').Request} request `req` object.
+   * @param {import('express').Response} response `res` object.
+   * @param {import('express').NextFunction} next next route.
+   * @returns
+   */
   async views(request, response, next) {
     try {
       const { hash } = request.params;
@@ -27,6 +21,32 @@ export default class ShortenController {
     }
   }
 
+  /**
+   * Get a single Shorten.
+   * @param {import('express').Request} request `req` object.
+   * @param {import('express').Response} response `res` object.
+   * @param {import('express').NextFunction} next next route.
+   * @returns
+   */
+  async findByPK(request, response, next) {
+    try {
+      const { hash } = request.params;
+
+      const shorten = await ShortenServices.findByPk({ hash });
+
+      return response.status(StatusCodes.OK).json(shorten);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Redirecting
+   * @param {import('express').Request} request `req` object.
+   * @param {import('express').Response} response `res` object.
+   * @param {import('express').NextFunction} next next route.
+   * @returns
+   */
   async redirecting(request, response, next) {
     try {
       const { hash } = request.params;
@@ -41,28 +61,25 @@ export default class ShortenController {
     }
   }
 
-  async resolving(request, response, next) {
+  async create(request, response, next) {
     try {
-      const { hash } = request.params;
+      const { href } = request.body;
 
-      const format = request.query?.format ?? 'json';
+      const shorten = await ShortenServices.create({ href });
 
-      const userAgent = request.userAgent;
-
-      const href = await ShortenServices.resolving({ hash, userAgent });
-
-      response.status(StatusCodes.OK);
-
-      if (format.toLowerCase() === 'raw') {
-        return response.type('text').send(href);
-      }
-
-      return response.json({ href });
+      return response.status(StatusCodes.CREATED).json(shorten);
     } catch (error) {
       return next(error);
     }
   }
 
+  /**
+   * Remove a Shorten
+   * @param {import('express').Request} request `req` object.
+   * @param {import('express').Response} response `res` object.
+   * @param {import('express').NextFunction} next next route.
+   * @returns
+   */
   async delete(request, response, next) {
     try {
       const { hash } = request.params;
@@ -75,3 +92,5 @@ export default class ShortenController {
     }
   }
 }
+
+export default new ShortenController();

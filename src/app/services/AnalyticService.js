@@ -61,20 +61,37 @@ export class AnalyticService {
     );
 
     // Update caching if exists
-    await this.#totalAnalyticsCachingHook();
+    await this.#incrementAnalyticsCachingHook();
   }
 
   async removeManyByShorten({ shortenId }) {
-    await Analytic.deleteMany({
+    const { deletedCount } = await Analytic.deleteMany({
       shortenId,
     });
+
+    // Reloading total Count
+    await this.#realodAnalyticsCachingHook(deletedCount);
   }
 
   async #totalDocuments() {
     return await Analytic.countDocuments();
   }
 
-  async #totalAnalyticsCachingHook() {
+  async #realodAnalyticsCachingHook(deletedCount) {
+    const currentCacheKey = this.cacheKey;
+
+    const total = await redisClient.get(currentCacheKey);
+
+    if (total) {
+      const totalRedirectings = Number(total) - deletedCount;
+
+      await redisClient.set(currentCacheKey, totalRedirectings.toString(), {
+        EX: redisConstants.totalAnalyticExpiresIn,
+      });
+    }
+  }
+
+  async #incrementAnalyticsCachingHook() {
     const currentCacheKey = this.cacheKey;
 
     const isValidCache = await redisClient.exists(currentCacheKey);
